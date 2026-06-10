@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>动态时空神探 Demo v1.6-mobile-file-fallback</title>
+  <title>动态时空神探 Demo v2.3-visual-reasoning-board</title>
   <style>
     :root {
       --bg: #f8f0df;
@@ -15,7 +15,6 @@
       --bad: #9b2d20;
       --accent: #b8752b;
     }
-    
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -153,6 +152,206 @@
       border-radius: 10px;
       padding: 10px;
     }
+
+    .home-screen {
+      padding: 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .level-card {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+      transition: transform .08s ease, filter .08s ease;
+    }
+    .level-card:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    .level-card h2 { margin-bottom: 8px; }
+    .level-card .tag {
+      display: inline-flex;
+      font-size: 12px;
+      border: 1px solid #9f7845;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #f7e2bd;
+      margin-bottom: 8px;
+    }
+    .top-actions { margin-top: 10px; }
+
+    .network-map {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      margin-top: 10px;
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .network-map svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .map-edge {
+      stroke: #9a6a36;
+      stroke-width: 4;
+      stroke-linecap: round;
+      opacity: .82;
+    }
+    .map-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      min-width: 58px;
+      min-height: 58px;
+      border: 2px solid #8b5a2b;
+      background: #f7e2bd;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 2px 0 rgba(0,0,0,.08);
+    }
+    .map-node .node-loc { font-size: 20px; line-height: 1; }
+    .map-node .node-people { font-size: 11px; font-weight: 700; margin-top: 3px; max-width: 76px; text-align:center; }
+    .reason-board {
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .time-map-card {
+      border: 1px solid #c49b68;
+      background: #fff8ea;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .time-title {
+      font-weight: 900;
+      margin-bottom: 6px;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+    }
+    .time-title .hint-mini { font-size: 11px; opacity:.72; font-weight:700; }
+    .mini-map {
+      position: relative;
+      height: 190px;
+      border: 1px dashed #b38651;
+      border-radius: 10px;
+      background: #fffdf8;
+      overflow: hidden;
+    }
+    .mini-map svg {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+    }
+    .mini-edge { stroke:#d0ad7b; stroke-width:3; stroke-linecap:round; }
+    .mini-node {
+      position:absolute;
+      transform:translate(-50%,-50%);
+      width: 58px;
+      min-height: 44px;
+      border: 1px solid #9a6a36;
+      background:#f7e2bd;
+      border-radius: 10px;
+      padding: 3px;
+      text-align:center;
+      font-size: 12px;
+    }
+    .mini-node .loc-id { font-weight:900; font-size:14px; line-height:1; }
+    .mini-node.has-info { background:#ffe7b8; border-width:2px; }
+    .mini-node.zero-info { background:#f3eadc; opacity:.88; }
+    .token-row { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:2px; }
+    .person-token, .unknown-token, .zero-token {
+      display:inline-flex;
+      min-width:17px;
+      height:17px;
+      padding:0 4px;
+      border-radius:999px;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:900;
+      border:1px solid #8b5a2b;
+      background:#fffdf8;
+    }
+    .unknown-token { background:#ead4ad; }
+    .zero-token { background:#fff; color:#75624b; border-style:dashed; }
+    .visit-board {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:8px;
+      margin-top:8px;
+    }
+    .visit-card {
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      border:1px solid #c49b68;
+      border-radius:12px;
+      padding:8px;
+      background:#fff8ea;
+      min-height:54px;
+    }
+    .avatar {
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:#f2c879;
+      border:2px solid #8b5a2b;
+      font-weight:900;
+      flex:0 0 auto;
+    }
+    .visit-lines { font-size:13px; line-height:1.55; }
+    .visit-chip {
+      display:inline-block;
+      margin:2px 4px 2px 0;
+      padding:2px 6px;
+      border:1px solid #9f7845;
+      border-radius:999px;
+      background:#fffdf8;
+      font-weight:700;
+    }
+    details.debug-box {
+      margin-top: 12px;
+      border: 1px dashed #9f7845;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background:#fffdf8;
+    }
+    details.debug-box summary {
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    @media (max-width: 700px) {
+      .home-screen { padding: 8px; }
+      .level-grid { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 1100px) {
       main { grid-template-columns: 1fr; }
     }
@@ -174,6 +373,168 @@
       border-radius: 8px;
       font-weight: 700;
     }
+
+    .network-map {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      margin-top: 10px;
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .network-map svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .map-edge {
+      stroke: #9a6a36;
+      stroke-width: 4;
+      stroke-linecap: round;
+      opacity: .82;
+    }
+    .map-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      min-width: 58px;
+      min-height: 58px;
+      border: 2px solid #8b5a2b;
+      background: #f7e2bd;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 2px 0 rgba(0,0,0,.08);
+    }
+    .map-node .node-loc { font-size: 20px; line-height: 1; }
+    .map-node .node-people { font-size: 11px; font-weight: 700; margin-top: 3px; max-width: 76px; text-align:center; }
+    .reason-board {
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .time-map-card {
+      border: 1px solid #c49b68;
+      background: #fff8ea;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .time-title {
+      font-weight: 900;
+      margin-bottom: 6px;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+    }
+    .time-title .hint-mini { font-size: 11px; opacity:.72; font-weight:700; }
+    .mini-map {
+      position: relative;
+      height: 190px;
+      border: 1px dashed #b38651;
+      border-radius: 10px;
+      background: #fffdf8;
+      overflow: hidden;
+    }
+    .mini-map svg {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+    }
+    .mini-edge { stroke:#d0ad7b; stroke-width:3; stroke-linecap:round; }
+    .mini-node {
+      position:absolute;
+      transform:translate(-50%,-50%);
+      width: 58px;
+      min-height: 44px;
+      border: 1px solid #9a6a36;
+      background:#f7e2bd;
+      border-radius: 10px;
+      padding: 3px;
+      text-align:center;
+      font-size: 12px;
+    }
+    .mini-node .loc-id { font-weight:900; font-size:14px; line-height:1; }
+    .mini-node.has-info { background:#ffe7b8; border-width:2px; }
+    .mini-node.zero-info { background:#f3eadc; opacity:.88; }
+    .token-row { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:2px; }
+    .person-token, .unknown-token, .zero-token {
+      display:inline-flex;
+      min-width:17px;
+      height:17px;
+      padding:0 4px;
+      border-radius:999px;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:900;
+      border:1px solid #8b5a2b;
+      background:#fffdf8;
+    }
+    .unknown-token { background:#ead4ad; }
+    .zero-token { background:#fff; color:#75624b; border-style:dashed; }
+    .visit-board {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:8px;
+      margin-top:8px;
+    }
+    .visit-card {
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      border:1px solid #c49b68;
+      border-radius:12px;
+      padding:8px;
+      background:#fff8ea;
+      min-height:54px;
+    }
+    .avatar {
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:#f2c879;
+      border:2px solid #8b5a2b;
+      font-weight:900;
+      flex:0 0 auto;
+    }
+    .visit-lines { font-size:13px; line-height:1.55; }
+    .visit-chip {
+      display:inline-block;
+      margin:2px 4px 2px 0;
+      padding:2px 6px;
+      border:1px solid #9f7845;
+      border-radius:999px;
+      background:#fffdf8;
+      font-weight:700;
+    }
+    details.debug-box {
+      margin-top: 12px;
+      border: 1px dashed #9f7845;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background:#fffdf8;
+    }
+    details.debug-box summary {
+      cursor:pointer;
+      font-weight:900;
+    }
+
     @media (max-width: 700px) {
       header { padding: 14px 12px; }
       header h1 { font-size: 20px; }
@@ -203,6 +564,9 @@
         grid-template-columns: 1fr;
       }
       .map { grid-template-columns: repeat(2, 1fr); }
+      .network-map { height: 230px; }
+      .timeline-grid { grid-template-columns: 1fr; }
+      .visit-board { grid-template-columns: 1fr; }
       .log { max-height: 220px; }
       table { font-size: 12px; }
       th, td { padding: 4px; }
@@ -210,19 +574,43 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>动态时空神探 Demo <span style="font-size:14px; padding:3px 8px; border:1px solid #fff7e8; border-radius:999px; vertical-align:middle;">v1.6-mobile-file-fallback</span></h1>
-    <p>固定 C 谜题 · 阶段性最终版</p>
+  <div id="homeScreen" class="home-screen">
+    <section>
+      <h1 style="margin:0 0 8px;">动态时空神探 Demo</h1>
+      <div class="small">统一关卡入口。选择一个谜题后进入调查界面；以后新谜题也会放在这里。</div>
+      <div class="level-grid">
+        <div class="level-card" data-level="puzzle_c">
+          <span class="tag">谜题 1 · 固定地点型</span>
+          <h2>C 房间的密信</h2>
+          <p>停电后的钟楼旅馆里，C 房间留下了一封被烧毁的密信。</p>
+          <p><b>目标：</b>找出唯一一个时间点，地点 C 正好有 2 个人，并提交这两个人。</p>
+        </div>
+        <div class="level-card" data-level="secret_meeting">
+          <span class="tag">谜题 2 · 隐藏地点型</span>
+          <h2>秘密碰面</h2>
+          <p>地上留下了一枚摔裂的怀表。有人曾在某个房间短暂碰面。</p>
+          <p><b>目标：</b>找出那次碰面的时间、地点，以及当时在场的两个人。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="gameScreen" style="display:none;">
+  <header id="gameHeader">
+    <h1>动态时空神探 Demo <span id="versionBadge" style="font-size:14px; padding:3px 8px; border:1px solid #fff7e8; border-radius:999px; vertical-align:middle;">v2.3-visual-reasoning-board</span></h1>
+    <p id="headerSubtitle">关卡选择 · 动态真相导演 Demo</p>
+    <div class="top-actions"><button id="backHomeBtn" class="ghost">返回关卡选择</button></div>
   </header>
 
   <main>
     <section>
-      <h2>谜题</h2>
-      <div class="story-card">
-        <div>停电后的钟楼旅馆里，C 房间留下了一封被烧毁的密信。</div>
-        <div class="quote">“那场秘密交易发生时，C 房间里正好有两个人。”</div>
+      <h2 id="puzzleTitle">谜题</h2>
+      <div id="storyCard" class="story-card">
+        <div>停电后的钟楼旅馆里，地上留下了一枚摔裂的怀表。</div>
+        <div class="quote">“他们曾在某个房间短暂碰面。”</div>
         <div>六位客人在夜里不断移动，没人说得清完整行踪。</div>
-        <div><b>找出那唯一的时间点，以及当时在 C 房间里的两个人。</b></div>
+        <div class="small">规则补充：每个时间段，所有人都会移动到相邻房间，不能停留原地。</div>
+        <div><b>找出那次秘密碰面的时间、地点，以及当时在场的两个人。</b></div>
       </div>
       <div class="row">
         <button id="newGameBtn" class="primary">新开一局</button>
@@ -267,20 +655,31 @@
       <h3>提交答案</h3>
       <div class="row">
         <label>时间</label><select id="answerTime"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
+        <label>地点</label><select id="answerLocation"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
         <label>人物1</label><select id="answerChar1"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
         <label>人物2</label><select id="answerChar2"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
         <button id="submitBtn">提交</button>
       </div>
       <div class="small" style="margin-top:8px;">提交时会先判断当前线索是否已经能唯一锁定答案；如果证据不足，会提示继续调查。</div>
 
-      <h3>推理表</h3>
-      <div class="small">这个表不会自动填满，只显示系统已承诺/已排除的信息。</div>
-      <div id="domainTable" style="margin-top:8px;"></div>
+      <h3>玩家推理图</h3>
+      <div class="small">这里不显示系统自动推理出的候选域，只把玩家已经拿到的线索画出来：T1 显示初始站位；时间+地点线索会在对应地图地点上画人数；角色+地点线索会记在人物头像旁边。</div>
+      <div class="reason-board">
+        <div id="playerTimelineMaps" class="timeline-grid"></div>
+        <h3 style="margin-top:12px;">人物到访记录</h3>
+        <div id="characterVisitBoard" class="visit-board"></div>
+      </div>
+
+      <details class="debug-box">
+        <summary>调试：系统自动推理表</summary>
+        <div class="small" style="margin:6px 0 8px;">这个表只给开发调试看，会显示系统约束传播后的候选域；正式玩法不建议默认展开。</div>
+        <div id="domainTable" style="margin-top:8px;"></div>
+      </details>
     </section>
 
     <section>
       <h2>线索记录</h2>
-      <div class="hint"><b>当前版本：</b>v1.6-mobile-file-fallback<br>如果你看不到下面的“调试 Log / 复制 log”，说明打开的是旧文件。</div>
+      <div class="hint"><b>当前版本：</b>v2.3-visual-reasoning-board<br>如果你看不到下面的“调试 Log / 复制 log”，说明打开的是旧文件。</div>
       <div class="row" style="margin:8px 0 10px;">
         <button id="copyDebugBtnTop" class="primary">复制调试 log</button>
         <button id="refreshDebugBtnTop" class="ghost">刷新 log</button>
@@ -296,6 +695,7 @@
       <textarea id="debugLog" class="debug-log" readonly placeholder="发现矛盾时，点“刷新 log”，再复制给我。"></textarea>
     </section>
   </main>
+  </div>
 
 <script>
 'use strict';
@@ -312,11 +712,51 @@ const adjacency = {
   F: ['D', 'E']
 };
 
-const mystery = {
-  targetLocation: 'C',
-  requiredCount: 2,
-  requireUniqueTime: true
+const puzzleConfigs = {
+  puzzle_c: {
+    id: 'puzzle_c',
+    title: '谜题 1：C 房间的密信',
+    subtitle: '谜题 1：C 房间的密信 · 固定地点型',
+    version: 'v2.3-visual-reasoning-board / puzzle-c',
+    storyHtml: `
+        <div>停电后的钟楼旅馆里，C 房间留下了一封被烧毁的密信。</div>
+        <div class="quote">“那场秘密交易发生时，C 房间里正好有两个人。”</div>
+        <div>六位客人在夜里不断移动，没人说得清完整行踪。</div>
+        <div class="small">规则补充：每个时间段，所有人都会移动到相邻房间，不能停留原地。</div>
+        <div><b>找出那唯一的时间点，以及当时在 C 房间里的两个人。</b></div>`,
+    mystery: {
+      type: 'fixed_location_pair',
+      targetLocation: 'C',
+      requiredCount: 2,
+      requireUniqueTime: true
+    },
+    answerNeedsLocation: false,
+    targetDescription: '找出唯一一个时间点，地点 C 正好有 2 个人，并提交这两个人。'
+  },
+  secret_meeting: {
+    id: 'secret_meeting',
+    title: '谜题 2：秘密碰面',
+    subtitle: '谜题 2：秘密碰面 · 隐藏地点型',
+    version: 'v2.3-visual-reasoning-board / secret-meeting',
+    storyHtml: `
+        <div>停电后的钟楼旅馆里，地上留下了一枚摔裂的怀表。</div>
+        <div class="quote">“他们曾在某个房间短暂碰面。”</div>
+        <div>六位客人在夜里不断移动，没人说得清完整行踪。</div>
+        <div class="small">规则补充：每个时间段，所有人都会移动到相邻房间，不能停留原地。</div>
+        <div><b>找出那次秘密碰面的时间、地点，以及当时在场的两个人。</b></div>`,
+    mystery: {
+      type: 'unique_meeting',
+      requiredCount: 2,
+      requireUniqueEvent: true
+    },
+    answerNeedsLocation: true,
+    targetDescription: '找出唯一一次秘密碰面：时间、地点，以及当时在场的两个人。'
+  }
 };
+
+let currentPuzzleId = 'puzzle_c';
+let currentPuzzle = puzzleConfigs[currentPuzzleId];
+let mystery = { ...currentPuzzle.mystery };
 
 const plans = {
   4: {
@@ -510,35 +950,59 @@ function getTargetLocationRanges(domains, chars, ts, target, s = null) {
   return ranges;
 }
 
-function getPossibleAnswerTimes(s) {
-  const ranges = getTargetLocationRanges(s.domains, s.characters, s.times, s.mystery.targetLocation, s);
-  const required = s.mystery.requiredCount;
-
-  // v0.8：如果已经公开承诺过某个时间点 C 正好为 required，
-  // 且谜题要求“唯一时间”，那么其他尚未精确公开的人数范围即使还能包含 required，
-  // 也不能再被显示为“可能答案时间”。
-  // 例：已知 T6 C=2，则 T3 的范围 0~3 不能继续显示为答案候选，
-  // 因为 T3 再变成 2 会违反“唯一一个时间点 C=2”。
-  const exactRequiredTimes = s.times.filter(t => ranges[t].exact && ranges[t].min === required);
-  if (s.mystery.requireUniqueTime && exactRequiredTimes.length > 0) {
-    return exactRequiredTimes;
+function getCellCountRange(domains, chars, time, location, s = null) {
+  const exact = s ? getExactTimeLocationCountFromLedger(s, time, location) : null;
+  if (exact !== null) return { min: exact, max: exact, exact: true };
+  let confirmed = 0;
+  let possible = 0;
+  for (const ch of chars) {
+    const d = domains[ch][time];
+    if (d.size === 1 && d.has(location)) confirmed++;
+    else if (d.has(location)) possible++;
   }
+  return { min: confirmed, max: confirmed + possible, exact: false };
+}
 
-  return s.times.filter(t => ranges[t].min <= required && required <= ranges[t].max);
+function getMeetingCandidateRanges(s) {
+  const out = {};
+  const locs = s.mystery.type === 'fixed_location_pair' ? [s.mystery.targetLocation] : s.locations;
+  for (const t of s.times) {
+    out[t] = {};
+    for (const loc of locs) out[t][loc] = getCellCountRange(s.domains, s.characters, t, loc, s);
+  }
+  return out;
+}
+
+function getPossibleAnswerEvents(s) {
+  const required = s.mystery.requiredCount;
+  const events = [];
+  const exactRequiredEvents = [];
+  const locs = s.mystery.type === 'fixed_location_pair' ? [s.mystery.targetLocation] : s.locations;
+  for (const t of s.times) {
+    for (const loc of locs) {
+      const r = getCellCountRange(s.domains, s.characters, t, loc, s);
+      if (r.exact && r.min === required) exactRequiredEvents.push({ time: t, location: loc });
+      if (r.min <= required && required <= r.max) events.push({ time: t, location: loc });
+    }
+  }
+  if ((s.mystery.requireUniqueEvent || s.mystery.requireUniqueTime) && exactRequiredEvents.length > 0) return exactRequiredEvents;
+  return events;
 }
 
 function checkMysteryPossibleLight(s) {
-  const ranges = getTargetLocationRanges(s.domains, s.characters, s.times, s.mystery.targetLocation, s);
   const required = s.mystery.requiredCount;
+  const locs = s.mystery.type === 'fixed_location_pair' ? [s.mystery.targetLocation] : s.locations;
   let possible = 0;
   let exactMatches = 0;
   for (const t of s.times) {
-    const r = ranges[t];
-    if (r.min <= required && required <= r.max) possible++;
-    if (r.exact && r.min === required) exactMatches++;
+    for (const loc of locs) {
+      const r = getCellCountRange(s.domains, s.characters, t, loc, s);
+      if (r.min <= required && required <= r.max) possible++;
+      if (r.exact && r.min === required) exactMatches++;
+    }
   }
   if (possible === 0) return false;
-  if (s.mystery.requireUniqueTime && exactMatches > 1) return false;
+  if ((s.mystery.requireUniqueEvent || s.mystery.requireUniqueTime) && exactMatches > 1) return false;
   return true;
 }
 
@@ -718,6 +1182,10 @@ function enforceCountConstraintsByDomains(s) {
       }
     }
 
+    // v2.1：把“相邻时间同一地点人数和不能超过总人数”的硬规则并入核心传播。
+    // 这一步只做矛盾检查，不做复杂推导，成本很低，但能更早排除明显不可能状态。
+    if (!checkAdjacentSameLocationCounts(s)) return false;
+
     if (!propagateMovement(s.domains, s.characters, s.times, s.adjacency)) return false;
   }
   return true;
@@ -829,43 +1297,40 @@ function isResponseSafe(response, s, plan, turnIndex, options = {}) {
   if (!checkCountConstraintsLight(test)) return { ok: false };
   if (!checkMysteryPossibleLight(test)) return { ok: false };
 
-  const possibleAnswerTimes = getPossibleAnswerTimes(test);
-  if (possibleAnswerTimes.length === 0) return { ok: false };
+  const possibleAnswerEvents = getPossibleAnswerEvents(test);
+  if (possibleAnswerEvents.length === 0) return { ok: false };
 
   // 规模只有 6 人×6 时间，配合个人路径过滤和部分人数剪枝，原型阶段可以接受。
-  if (!canCompleteTimeline(test, null, 7000)) return { ok: false };
+  if (!canCompleteTimelineProgressive(test, null, [10000, 30000, 80000])) return { ok: false };
 
-  // v1.6：固定 C 谜题阶段性最终版；下拉选项改为 HTML 静态兜底，兼容 iPhone 文件预览/本地打开。
+  // v2.1：秘密碰面谜题可靠性优化版；提高补全搜索可靠性，保留手机下拉兜底。
   // 这里不再调用任何答案组合计数/评估逻辑，只保证线索安全且能补全完整真相。
-  return { ok: true, nextState: test, possibleAnswerTimes };
+  return { ok: true, nextState: test, possibleAnswerEvents };
 }
 
 function getClueStrength(response, s) {
   let strength = 0;
   if (response.type === 'time_location') {
-    const isTarget = response.location === s.mystery.targetLocation;
-    if (response.count === 0) strength += 3;
+    if (response.count === 0) strength += 2;
     if (response.count === 1) strength += 4;
-    if (response.count === s.mystery.requiredCount && isTarget) strength += 7;
+    if (response.count === s.mystery.requiredCount) strength += 7;
     if (response.count === 3) strength += 2;
+    if (response.count >= 4) strength += 1;
     if (response.knownCharacter) strength += 3;
   } else {
-    const isTarget = response.location === s.mystery.targetLocation;
     if (response.count === 0) strength += 5;
     if (response.count === 1) strength += 5;
     if (response.count === 2) strength += 3;
     if (response.count >= 3) strength += 1;
     if (response.knownTime) strength += 3;
-    if (isTarget) strength += 1;
   }
   return strength;
 }
 
 function isDecoyResponse(response, s) {
-  const target = s.mystery.targetLocation;
   const required = s.mystery.requiredCount;
-  if (response.type === 'time_location') return response.location === target && response.count !== required && response.count > 0;
-  if (response.type === 'character_location') return response.location === target && response.count >= 2;
+  if (response.type === 'time_location') return response.count !== required && response.count > 0;
+  if (response.type === 'character_location') return response.count >= 2;
   return false;
 }
 
@@ -898,9 +1363,9 @@ function chooseResponse(investigation, s, plan, turnIndex) {
       if (turnIndex + 1 <= plan.preferDecoyBeforeTurn && decoy) score += 4;
       if (turnIndex + 1 > plan.preferDecoyBeforeTurn && decoy) score -= 1;
 
-      if (response.type === 'time_location' && response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) {
+      if (response.type === 'time_location' && response.count === s.mystery.requiredCount) {
         if (turnIndex + 1 >= plan.allowCEqualsTwoFromTurn) score += 5;
-        else score -= 10;
+        else score -= 8;
       }
 
       if (response.type === 'time_location' && response.count === 0) {
@@ -910,9 +1375,9 @@ function chooseResponse(investigation, s, plan, turnIndex) {
 
 
       if (turnIndex + 1 >= plan.forceConvergeFromTurn) {
-        const n = safe.possibleAnswerTimes.length;
+        const n = safe.possibleAnswerEvents.length;
         if (n === 1) score += 10;
-        else score -= n * 2;
+        else score -= Math.min(12, n);
       }
 
       // 少量随机扰动，避免每局手感完全一样。
@@ -921,7 +1386,7 @@ function chooseResponse(investigation, s, plan, turnIndex) {
         response,
         score,
         strength,
-        possibleAnswerTimes: safe.possibleAnswerTimes
+        possibleAnswerEvents: safe.possibleAnswerEvents
       });
     }
     scored.sort((a, b) => b.score - a.score);
@@ -943,7 +1408,7 @@ function commitChosenResponse(chosen, s, investigation, consumeAction) {
   if (response.type === 'time_location') {
     applyTimeLocationResponse(s.domains, s.ledger, response, s);
     if (response.count === 0) s.ledger.zeroClueCount++;
-    if (response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
+    if (response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
   } else {
     applyCharacterLocationResponse(s.domains, s.ledger, response, s);
   }
@@ -998,12 +1463,14 @@ function checkFinalLedgerWithTruth(truth, s) {
 }
 
 function checkMysteryAndGetAnswer(truth, s) {
-  const target = s.mystery.targetLocation;
   const required = s.mystery.requiredCount;
   const matches = [];
+  const locs = s.mystery.type === 'fixed_location_pair' ? [s.mystery.targetLocation] : s.locations;
   for (const t of s.times) {
-    const people = s.characters.filter(ch => truth[ch][t] === target);
-    if (people.length === required) matches.push({ time: t, location: target, characters: people });
+    for (const loc of locs) {
+      const people = s.characters.filter(ch => truth[ch][t] === loc);
+      if (people.length === required) matches.push({ time: t, location: loc, characters: people });
+    }
   }
   return matches.length === 1 ? matches[0] : null;
 }
@@ -1011,17 +1478,55 @@ function checkMysteryAndGetAnswer(truth, s) {
 function answerEquals(a, b) {
   if (!a || !b) return false;
   if (a.time !== b.time) return false;
+  if (a.location !== b.location) return false;
   const s1 = [...a.characters].sort().join('|');
   const s2 = [...b.characters].sort().join('|');
   return s1 === s2;
 }
 
-function canCompleteTimeline(s, answerConstraint = null, maxNodes = 5000) {
+function canCompleteTimeline(s, answerConstraint = null, maxNodes = 20000) {
   const truth = finalizeTimeline(s, answerConstraint, maxNodes);
   return !!truth;
 }
 
-function finalizeTimeline(s, answerConstraint = null, maxNodes = 12000) {
+function completeTimelineProgressive(s, answerConstraint = null, limits = [10000, 30000, 80000]) {
+  // v2.1：渐进式补全。多数局面用小上限很快返回；复杂局面再加码，避免过早误判无解。
+  let lastLimit = limits[limits.length - 1];
+  for (const limit of limits) {
+    lastLimit = limit;
+    const truth = finalizeTimeline(s, answerConstraint, limit);
+    if (truth) return { truth, limit, exhausted: false };
+  }
+  return { truth: null, limit: lastLimit, exhausted: true };
+}
+
+function canCompleteTimelineProgressive(s, answerConstraint = null, limits = [10000, 30000, 80000]) {
+  return !!completeTimelineProgressive(s, answerConstraint, limits).truth;
+}
+
+function checkAnswerConstraintForPartial(assignedPaths, s, remainingChars, answerConstraint) {
+  if (!answerConstraint) return true;
+  const ti = s.times.indexOf(answerConstraint.time);
+  if (ti < 0) return false;
+  const loc = answerConstraint.location;
+  const answerSet = new Set(answerConstraint.characters);
+
+  for (const ch in assignedPaths) {
+    const atTarget = assignedPaths[ch][ti] === loc;
+    if (answerSet.has(ch) && !atTarget) return false;
+    if (!answerSet.has(ch) && atTarget) return false;
+  }
+
+  for (const ch of answerSet) {
+    if (!assignedPaths[ch]) {
+      if (!remainingChars.includes(ch)) return false;
+      if (!s.domains[ch][answerConstraint.time].has(loc)) return false;
+    }
+  }
+  return true;
+}
+
+function finalizeTimeline(s, answerConstraint = null, maxNodes = 30000) {
   const filtered = getFilteredPathsByCharacter(s);
   if (!filtered) return null;
   const order = s.characters.slice().sort((a, b) => filtered[a].length - filtered[b].length);
@@ -1049,6 +1554,10 @@ function finalizeTimeline(s, answerConstraint = null, maxNodes = 12000) {
     for (const path of paths) {
       assigned[ch] = path;
       if (!checkTimeLocationCountsForPartial(assigned, s, remaining)) {
+        delete assigned[ch];
+        continue;
+      }
+      if (!checkAnswerConstraintForPartial(assigned, s, remaining, answerConstraint)) {
         delete assigned[ch];
         continue;
       }
@@ -1093,7 +1602,7 @@ function commitTruthBackedInvestigation(investigation, truth, s, markLockedFallb
   if (response.type === 'time_location') {
     applyTimeLocationResponse(s.domains, s.ledger, response, s);
     if (response.count === 0) s.ledger.zeroClueCount++;
-    if (response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
+    if (response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
   } else {
     applyCharacterLocationResponse(s.domains, s.ledger, response, s);
   }
@@ -1190,7 +1699,8 @@ function addLog(inv, resp, lockedFallback) {
 
 function lockTruthNow() {
   if (state.gameOver) return;
-  const truth = finalizeTimeline(state, null, 30000);
+  const completion = completeTimelineProgressive(state, null, [20000, 60000, 120000]);
+  const truth = completion.truth;
   if (!truth) {
     state.message = '当前约束暂时无法补全真相。';
   } else {
@@ -1228,17 +1738,19 @@ function estimateAnswerComboCountCheap(s) {
   return Math.max(0, Math.min(99, Math.round(total)));
 }
 
-function countPossibleAnswersForState(s, maxChecks = 90, stopAfter = 3) {
+function countPossibleAnswersForState(s, maxChecks = 540, stopAfter = 3) {
   const answers = [];
   let checks = 0;
   for (const t of s.times) {
-    for (let i = 0; i < s.characters.length; i++) {
-      for (let j = i + 1; j < s.characters.length; j++) {
-        const ans = { time: t, location: s.mystery.targetLocation, characters: [s.characters[i], s.characters[j]] };
-        checks++;
-        if (canCompleteTimeline(s, ans, 900)) answers.push(ans);
-        if (checks >= maxChecks || answers.length >= stopAfter) {
-          return { count: answers.length, truncated: answers.length >= stopAfter || checks >= maxChecks, examples: answers };
+    for (const loc of s.locations) {
+      for (let i = 0; i < s.characters.length; i++) {
+        for (let j = i + 1; j < s.characters.length; j++) {
+          const ans = { time: t, location: loc, characters: [s.characters[i], s.characters[j]] };
+          checks++;
+          if (canCompleteTimelineProgressive(s, ans, [2000, 8000, 20000])) answers.push(ans);
+          if (checks >= maxChecks || answers.length >= stopAfter) {
+            return { count: answers.length, truncated: answers.length >= stopAfter || checks >= maxChecks, examples: answers };
+          }
         }
       }
     }
@@ -1246,16 +1758,19 @@ function countPossibleAnswersForState(s, maxChecks = 90, stopAfter = 3) {
   return { count: answers.length, truncated: false, examples: answers };
 }
 
-function getPossibleAnswers(maxChecks = 90) {
+function getPossibleAnswers(maxChecks = 540) {
   const answers = [];
   let checks = 0;
+  const locs = state.mystery.type === 'fixed_location_pair' ? [state.mystery.targetLocation] : locations;
   for (const t of times) {
-    for (let i = 0; i < characters.length; i++) {
-      for (let j = i + 1; j < characters.length; j++) {
-        const ans = { time: t, location: mystery.targetLocation, characters: [characters[i], characters[j]] };
-        checks++;
-        if (canCompleteTimeline(state, ans, 3000)) answers.push(ans);
-        if (checks >= maxChecks && answers.length > 1) return answers;
+    for (const loc of locs) {
+      for (let i = 0; i < characters.length; i++) {
+        for (let j = i + 1; j < characters.length; j++) {
+          const ans = { time: t, location: loc, characters: [characters[i], characters[j]] };
+          checks++;
+          if (canCompleteTimelineProgressive(state, ans, [4000, 20000, 60000])) answers.push(ans);
+          if (checks >= maxChecks && answers.length > 1) return answers;
+        }
       }
     }
   }
@@ -1265,6 +1780,7 @@ function getPossibleAnswers(maxChecks = 90) {
 function submitAnswer() {
   if (state.gameOver) return;
   const t = document.getElementById('answerTime').value;
+  const loc = state.mystery.type === 'fixed_location_pair' ? state.mystery.targetLocation : document.getElementById('answerLocation').value;
   const c1 = document.getElementById('answerChar1').value;
   const c2 = document.getElementById('answerChar2').value;
   if (c1 === c2) {
@@ -1272,27 +1788,42 @@ function submitAnswer() {
     render();
     return;
   }
-  const submitted = { time: t, location: mystery.targetLocation, characters: [c1, c2] };
-  const possible = getPossibleAnswers(90);
+  const submitted = { time: t, location: loc, characters: [c1, c2] };
+  const possible = getPossibleAnswers(540);
   if (possible.length !== 1) {
     state.message = `证据不足：当前线索下还不能唯一锁定答案（可补全答案数约为 ${possible.length}）。请继续调查。`;
     render();
     return;
   }
   const only = possible[0];
-  const truth = finalizeTimeline(state, only, 30000);
+  const completion = completeTimelineProgressive(state, only, [20000, 60000, 120000]);
+  const truth = completion.truth;
+  if (!truth) {
+    state.message = '当前答案虽然看似唯一，但完整时间线补全超时。请再调查一条线索后提交。';
+    render();
+    return;
+  }
   state.lockedTruth = truth;
   state.gameOver = true;
   if (answerEquals(submitted, only)) {
-    showFinal(`破案成功！\n\n答案：${only.time}，地点 C 的两个人是：${only.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+    showFinal(`破案成功！
+
+答案：${only.time}，地点 ${only.location} 的两个人是：${only.characters.join('、')}。
+
+${formatTruthTable(truth)}`);
   } else {
-    showFinal(`答案错误。\n\n正确答案：${only.time}，地点 C 的两个人是：${only.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+    showFinal(`答案错误。
+
+正确答案：${only.time}，地点 ${only.location} 的两个人是：${only.characters.join('、')}。
+
+${formatTruthTable(truth)}`);
   }
   render();
 }
 
 function revealFailureTruth() {
-  const truth = finalizeTimeline(state, null, 30000);
+  const completion = completeTimelineProgressive(state, null, [20000, 60000, 120000]);
+  const truth = completion.truth;
   if (!truth) {
     showFinal('失败：当前约束无法补全真相。');
     return;
@@ -1300,7 +1831,7 @@ function revealFailureTruth() {
   const ans = checkMysteryAndGetAnswer(truth, state);
   state.lockedTruth = truth;
   state.gameOver = true;
-  showFinal(`调查结束。\n\n本局真相：${ans.time}，地点 C 的两个人是：${ans.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+  showFinal(`调查结束。\n\n本局真相：${ans.time}，地点 ${ans.location} 的两个人是：${ans.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
 }
 
 function formatTruthTable(truth) {
@@ -1326,22 +1857,29 @@ function domainsToPlain(domains) {
 
 function makeDebugSnapshot() {
   if (!state) return 'no state';
-  const possibleAnswerTimes = getPossibleAnswerTimes(state);
-  const ranges = getTargetLocationRanges(state.domains, state.characters, state.times, state.mystery.targetLocation, state);
+  const possibleAnswerEvents = getPossibleAnswerEvents(state);
+  const meetingCandidateRanges = getMeetingCandidateRanges(state);
   const payload = {
-    version: 'dynamic_detective_debug_v1.6_mobile_file_fallback',
-    note: '请把这段完整复制给我。它包含初始站位、调查历史、约束账本、C人数范围和当前候选域。',
+    version: 'dynamic_detective_debug_v2.3_visual_reasoning_board',
+    puzzleId: currentPuzzleId,
+    puzzleTitle: currentPuzzle.title,
+    note: '请把这段完整复制给我。它包含初始站位、调查历史、约束账本、会面事件候选范围和当前候选域。',
     plan: state.plan?.name,
     paidTurnCount: getPaidTurnCount(),
     initialPositions: state.initialPositions,
     adjacency: state.adjacency,
     mystery: state.mystery,
-    possibleAnswerTimes,
-    targetLocationRanges: ranges,
+    possibleAnswerEvents,
+    meetingCandidateRanges,
     ledger: state.ledger,
     domains: domainsToPlain(state.domains),
     lockedTruth: state.lockedTruth,
     lockedTruthAnswer: state.lockedTruth ? checkMysteryAndGetAnswer(state.lockedTruth, state) : null,
+    reliability: {
+      completionSearch: 'v2.1 progressive limits: safety 10000/30000/80000, submit 4000/20000/60000 per candidate',
+      forcedMoveRule: '必须移动到相邻地点，不能停留原地',
+      adjacentCountCheckInCorePropagation: true
+    },
     gameOver: state.gameOver,
     message: state.message
   };
@@ -1377,6 +1915,8 @@ function render() {
   renderStatus();
   renderMap();
   renderInitialList();
+  renderPlayerReasoningBoard();
+  renderCharacterVisitBoard();
   renderDomainTable();
   refreshDebugLog();
 }
@@ -1385,32 +1925,153 @@ function renderStatus() {
   const paid = getPaidTurnCount();
   const hasTargetTurns = state.plan.targetTurns < 900;
   const remaining = hasTargetTurns ? Math.max(0, state.plan.targetTurns - paid) : '—';
-  const possibleTimes = getPossibleAnswerTimes(state);
+  const possibleEvents = getPossibleAnswerEvents(state);
+  const eventText = possibleEvents.length <= 8
+    ? possibleEvents.map(e => `${e.time}-${e.location}`).join('、')
+    : `${possibleEvents.slice(0, 8).map(e => `${e.time}-${e.location}`).join('、')} 等 ${possibleEvents.length} 个`;
   document.getElementById('status').innerHTML = `
+    <div><b>当前关卡：</b>${currentPuzzle.title}</div>
     <div><b>模式：</b>${state.plan.name}</div>
     <div><b>调查节奏：</b>${hasTargetTurns ? `目标 ${state.plan.targetTurns} 回合` : '不限制目标回合'}，已消耗：${paid}，建议剩余：${remaining}</div>
-    <div><b>谜题目标：</b>找出唯一时间点，以及当时在 C 房间里的两个人。</div>
-    <div><b>当前 C 仍可能成为答案的时间：</b>${possibleTimes.join('、') || '无'}</div>
+    <div><b>谜题目标：</b>${currentPuzzle.targetDescription}</div>
+    <div><b>移动规则：</b>每个时间段必须移动到相邻房间，不能停留原地。</div>
+    <div><b>当前仍可能成为答案的事件：</b>${eventText || '无'}</div>
     <div class="${state.message ? 'ok' : 'small'}">${state.message || '系统尚未预设完整真相，真相会随调查逐步确定。'}</div>
   `;
 }
 
+function getMapCoords() {
+  return {
+    A: { x: 22, y: 34 },
+    B: { x: 22, y: 70 },
+    C: { x: 48, y: 52 },
+    D: { x: 72, y: 52 },
+    E: { x: 88, y: 34 },
+    F: { x: 88, y: 70 }
+  };
+}
+
+function renderEdgesSvg(prefix = '') {
+  const coords = getMapCoords();
+  const edges = [['A','B'], ['A','C'], ['B','C'], ['C','D'], ['D','E'], ['D','F'], ['E','F']];
+  const cls = prefix === 'mini' ? 'mini-edge' : 'map-edge';
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${edges.map(([a,b]) => {
+    const p1 = coords[a], p2 = coords[b];
+    return `<line class="${cls}" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />`;
+  }).join('')}</svg>`;
+}
+
 function renderMap() {
   const map = document.getElementById('map');
-  map.innerHTML = '';
-  const time = 'T1';
+  if (!map) return;
+  const coords = getMapCoords();
+  let html = `<div class="network-map">${renderEdgesSvg('main')}`;
   for (const loc of locations) {
-    const div = document.createElement('div');
-    div.className = 'loc';
-    const here = characters.filter(ch => state.initialPositions[ch] === loc);
-    div.innerHTML = `<strong>${loc}</strong><div class="small">邻接：${adjacency[loc].join('、')}</div><div class="char-list">${here.length ? here.map(x => `<span class="pill">${x}</span>`).join('') : '—'}</div>`;
-    map.appendChild(div);
+    const p = coords[loc];
+    const here = state ? characters.filter(ch => state.initialPositions[ch] === loc) : [];
+    html += `<div class="map-node" style="left:${p.x}%; top:${p.y}%;"><div><div class="node-loc">${loc}</div><div class="node-people">${here.join(' ') || '—'}</div></div></div>`;
   }
+  html += '</div>';
+  map.innerHTML = html;
 }
 
 function renderInitialList() {
   const el = document.getElementById('initialList');
   el.innerHTML = characters.map(ch => `<span class="pill">${ch}: ${state.initialPositions[ch]}</span>`).join('');
+}
+
+
+function getConfirmedCharsForTimeLocation(time, location) {
+  if (!state) return [];
+  const seen = new Set();
+  const out = [];
+  for (const f of state.ledger.fixedPositions) {
+    if (f.time === time && f.location === location && !seen.has(f.character)) {
+      seen.add(f.character);
+      out.push(f.character);
+    }
+  }
+  return out.sort((a, b) => characters.indexOf(a) - characters.indexOf(b));
+}
+
+function getKnownCountForTimeLocation(time, location) {
+  if (!state) return null;
+  return getExactTimeLocationCount(state, time, location);
+}
+
+function renderTokenRow(chars, unknownCount, zeroKnown) {
+  if (zeroKnown) return '<div class="token-row"><span class="zero-token">0</span></div>';
+  const parts = [];
+  for (const ch of chars) parts.push(`<span class="person-token">${ch}</span>`);
+  for (let i = 0; i < unknownCount; i++) parts.push('<span class="unknown-token">?</span>');
+  return parts.length ? `<div class="token-row">${parts.join('')}</div>` : '';
+}
+
+function renderMiniMap(time) {
+  const coords = getMapCoords();
+  let html = `<div class="mini-map">${renderEdgesSvg('mini')}`;
+  for (const loc of locations) {
+    const p = coords[loc];
+    const confirmed = getConfirmedCharsForTimeLocation(time, loc);
+    const knownCount = getKnownCountForTimeLocation(time, loc);
+    const hasCount = knownCount !== null;
+    const zeroKnown = hasCount && knownCount === 0;
+    const unknownCount = hasCount ? Math.max(0, knownCount - confirmed.length) : 0;
+    const cls = zeroKnown ? 'mini-node zero-info' : (confirmed.length || hasCount ? 'mini-node has-info' : 'mini-node');
+    const countLabel = hasCount ? `<div class="small" style="font-size:10px; opacity:.72;">${knownCount}人</div>` : '';
+    html += `<div class="${cls}" style="left:${p.x}%; top:${p.y}%;"><div class="loc-id">${loc}</div>${countLabel}${renderTokenRow(confirmed, unknownCount, zeroKnown)}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderPlayerReasoningBoard() {
+  const el = document.getElementById('playerTimelineMaps');
+  if (!el || !state) return;
+  let html = '';
+  for (const t of times) {
+    const subtitle = t === 'T1' ? '初始站位' : '玩家线索';
+    html += `<div class="time-map-card"><div class="time-title"><span>${t}</span><span class="hint-mini">${subtitle}</span></div>${renderMiniMap(t)}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function getLatestCharacterLocationClues() {
+  const byChar = {};
+  for (const ch of characters) byChar[ch] = new Map();
+  if (!state) return byChar;
+  for (const clue of state.ledger.characterLocationCounts) {
+    byChar[clue.character].set(clue.location, clue);
+  }
+  return byChar;
+}
+
+function getKnownVisitTimeText(character, location) {
+  if (!state) return '';
+  const timesKnown = [];
+  const seen = new Set();
+  for (const v of state.ledger.knownVisitTimes) {
+    if (v.character === character && v.location === location && !seen.has(v.time)) {
+      seen.add(v.time);
+      timesKnown.push(v.time);
+    }
+  }
+  return timesKnown.length ? `，已知${timesKnown.join('、')}` : '';
+}
+
+function renderCharacterVisitBoard() {
+  const el = document.getElementById('characterVisitBoard');
+  if (!el || !state) return;
+  const byChar = getLatestCharacterLocationClues();
+  let html = '';
+  for (const ch of characters) {
+    const entries = [...byChar[ch].values()].sort((a,b) => locations.indexOf(a.location) - locations.indexOf(b.location));
+    const body = entries.length
+      ? entries.map(c => `<span class="visit-chip">${c.location}: ${c.count}次${getKnownVisitTimeText(ch, c.location)}</span>`).join('')
+      : '<span class="small">暂无角色+地点线索</span>';
+    html += `<div class="visit-card"><div class="avatar">${ch}</div><div class="visit-lines">${body}</div></div>`;
+  }
+  el.innerHTML = html;
 }
 
 function renderDomainTable() {
@@ -1546,6 +2207,7 @@ function initUI() {
   fillSelect('characterSelect', characters);
   fillSelect('locationSelect2', locations);
   fillSelect('answerTime', times);
+  fillSelect('answerLocation', locations);
   fillSelect('answerChar1', characters);
   fillSelect('answerChar2', characters);
 
@@ -1557,6 +2219,10 @@ function initUI() {
     });
   });
   document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+  document.getElementById('backHomeBtn').addEventListener('click', showHome);
+  document.querySelectorAll('.level-card').forEach(card => {
+    card.addEventListener('click', () => startLevel(card.dataset.level));
+  });
   document.getElementById('investigateBtn').addEventListener('click', () => {
     const mode = document.querySelector('input[name="mode"]:checked').value;
     let inv;
@@ -1575,24 +2241,45 @@ function initUI() {
   document.getElementById('copyDebugBtnTop').addEventListener('click', copyDebugLog);
 }
 
-function startNewGame() {
-  // v1.2：v1.0/v1.1 已经移除了 4/8 下拉框，但旧代码仍读取 planSelect，导致初始化失败，state 一直是 null。
-  const planSelect = document.getElementById('planSelect');
-  const plan = planSelect ? plans[planSelect.value] : plans.standard;
-  try {
-    state = newState(plan || plans.standard);
-    const log = document.getElementById('log');
-    if (log) log.innerHTML = '';
-    showFinal('尚未揭示真相。');
-    render();
-  } catch (e) {
-    state = null;
-    const box = document.getElementById('debugLog');
-    if (box) box.value = `初始化失败：${e.message || e}\n${e.stack || ''}`;
-    const status = document.getElementById('status');
-    if (status) status.innerHTML = `<span class="bad">初始化失败：${e.message || e}</span>`;
-    throw e;
+function applyPuzzleUI() {
+  const titleEl = document.getElementById('puzzleTitle');
+  const storyEl = document.getElementById('storyCard');
+  const subtitleEl = document.getElementById('headerSubtitle');
+  const versionEl = document.getElementById('versionBadge');
+  if (titleEl) titleEl.textContent = currentPuzzle.title;
+  if (storyEl) storyEl.innerHTML = currentPuzzle.storyHtml;
+  if (subtitleEl) subtitleEl.textContent = currentPuzzle.subtitle;
+  if (versionEl) versionEl.textContent = currentPuzzle.version;
+
+  const answerLocation = document.getElementById('answerLocation');
+  if (answerLocation) {
+    answerLocation.value = currentPuzzle.mystery.targetLocation || 'A';
+    answerLocation.disabled = !currentPuzzle.answerNeedsLocation;
   }
+}
+
+function startLevel(levelId) {
+  currentPuzzleId = levelId;
+  currentPuzzle = puzzleConfigs[currentPuzzleId] || puzzleConfigs.puzzle_c;
+  mystery = { ...currentPuzzle.mystery };
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = '';
+  applyPuzzleUI();
+  startNewGame();
+}
+
+function showHome() {
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('homeScreen').style.display = '';
+}
+
+function startNewGame() {
+  const plan = plans.standard;
+  state = newState(plan);
+  document.getElementById('log').innerHTML = '';
+  showFinal('尚未揭示真相。');
+  applyPuzzleUI();
+  render();
 }
 
 window.addEventListener('error', (event) => {
