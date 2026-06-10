@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>动态时空神探 Demo v2.3-visual-reasoning-board</title>
+  <title>动态时空神探 Demo v2.4-portrait-map-notes</title>
   <style>
     :root {
       --bg: #f8f0df;
@@ -571,13 +571,73 @@
       table { font-size: 12px; }
       th, td { padding: 4px; }
     }
+  
+
+/* v2.4 竖屏地图主界面 */
+.legacy-controls { display:none !important; }
+.portrait-shell { min-height:100vh; display:flex; flex-direction:column; max-width:760px; margin:0 auto; background:var(--bg); }
+.portrait-header { padding:10px 12px; background:#56371e; color:#fff7e8; border-bottom:3px solid #2f1d0e; }
+.header-line { display:flex; align-items:center; gap:8px; }
+.header-title-wrap { flex:1; min-width:0; text-align:center; }
+.portrait-header h1 { margin:0; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.portrait-header p { margin:2px 0 0; font-size:12px; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.version-pill { display:inline-block; margin-top:6px; font-size:10px; padding:2px 6px; border:1px solid #fff7e8; border-radius:999px; opacity:.9; }
+.small-btn { padding:6px 8px; font-size:12px; }
+.story-strip { padding:8px 10px 0; background:transparent; border:0; box-shadow:none; }
+.story-strip details { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px; }
+.story-strip summary { font-weight:900; cursor:pointer; }
+.story-strip .story-card { margin:8px 0; }
+.portrait-status { margin-top:8px; max-height:170px; overflow:auto; }
+.time-tabs { display:flex; gap:6px; padding:8px 10px; overflow-x:auto; position:sticky; top:0; z-index:5; background:var(--bg); border-bottom:1px solid #d0ad7b; }
+.time-tab { min-width:52px; padding:10px 0; border-radius:12px; background:#fff8ea; border:1px solid #9f7845; font-weight:900; }
+.time-tab.active { background:#f4b24b; border-width:2px; }
+.portrait-main { flex:1; padding:10px 10px 84px; overflow:auto; }
+.current-map-topline { display:flex; justify-content:space-between; gap:8px; align-items:center; margin:2px 0 8px; }
+.portrait-map-wrap { margin:0; }
+.portrait-big-map { position:relative; height:min(62vh, 560px); min-height:390px; background:#fffdf8; border:2px solid #8b5a2b; border-radius:18px; overflow:hidden; box-shadow:0 2px 0 rgba(0,0,0,.08); }
+.portrait-big-map svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.big-edge { stroke:#9a6a36; stroke-width:4; stroke-linecap:round; opacity:.82; }
+.big-node { position:absolute; transform:translate(-50%,-50%); width:86px; min-height:78px; border:2px solid #8b5a2b; background:#f7e2bd; border-radius:18px; padding:6px 5px; text-align:center; box-shadow:0 2px 0 rgba(0,0,0,.1); display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--dark); }
+.big-node:active { transform:translate(-50%,-50%) scale(.98); filter:brightness(.98); }
+.big-node.has-info { background:#ffe7b8; border-width:3px; }
+.big-node.zero-info { background:#f3eadc; }
+.big-node .loc-id { font-weight:900; font-size:23px; line-height:1; }
+.big-node .count-line { font-size:11px; opacity:.75; font-weight:800; margin-top:2px; }
+.big-node .token-row { margin-top:4px; }
+.note-row { margin-top:4px; display:flex; flex-wrap:wrap; gap:2px; justify-content:center; }
+.note-token { display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:18px; padding:0 4px; border-radius:999px; font-size:11px; font-weight:900; border:1px solid #9f7845; background:#fffdf8; }
+.note-token.maybe { color:#236b3a; border-color:#236b3a; }
+.note-token.not { color:#9b2d20; border-color:#9b2d20; text-decoration:line-through; }
+.initial-inline { margin:8px 0; }
+.visit-panel, .log-panel { margin-top:10px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px; }
+.panel-title { font-weight:900; margin-bottom:6px; }
+.portrait-visit-board { grid-template-columns:1fr; }
+.log-panel summary { cursor:pointer; font-weight:900; }
+.dev-panel { margin-top:10px; }
+.bottom-actions { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:min(760px,100%); display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:8px; padding:10px; background:rgba(248,240,223,.96); border-top:2px solid #8b5a2b; z-index:20; }
+.bottom-actions button { min-height:48px; font-size:16px; }
+.modal-backdrop { position:fixed; inset:0; z-index:100; background:rgba(37,24,12,.45); padding:18px 10px; display:flex; align-items:flex-end; justify-content:center; }
+.modal-card { width:min(720px,100%); max-height:88vh; overflow:auto; background:var(--panel); border:2px solid var(--line); border-radius:18px 18px 14px 14px; padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+.modal-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.modal-head h2 { margin:0; }
+.segmented { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0 12px; }
+.segmented button.active { background:#f4b24b; border-width:2px; }
+.choice-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.choice-grid button { min-height:42px; font-size:16px; background:#fffdf7; }
+.choice-grid button.active { background:#f4b24b; border-width:2px; }
+.modal-section h3, .modal-card h3 { margin:12px 0 8px; }
+.modal-main-btn { width:100%; margin-top:14px; min-height:48px; font-size:17px; }
+.note-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px; }
+.note-actions button { min-height:44px; }
+@media (max-width: 420px) { .portrait-header h1 { font-size:15px; } .big-node { width:78px; min-height:72px; } .choice-grid { grid-template-columns:repeat(3,1fr); } }
+
   </style>
 </head>
 <body>
-  <div id="homeScreen" class="home-screen">
+  <div id="homeScreen" class="home-screen portrait-home">
     <section>
       <h1 style="margin:0 0 8px;">动态时空神探 Demo</h1>
-      <div class="small">统一关卡入口。选择一个谜题后进入调查界面；以后新谜题也会放在这里。</div>
+      <div class="small">选择关卡。进入后使用竖屏地图界面调查、标注、提交。</div>
       <div class="level-grid">
         <div class="level-card" data-level="puzzle_c">
           <span class="tag">谜题 1 · 固定地点型</span>
@@ -596,107 +656,116 @@
   </div>
 
   <div id="gameScreen" style="display:none;">
-  <header id="gameHeader">
-    <h1>动态时空神探 Demo <span id="versionBadge" style="font-size:14px; padding:3px 8px; border:1px solid #fff7e8; border-radius:999px; vertical-align:middle;">v2.3-visual-reasoning-board</span></h1>
-    <p id="headerSubtitle">关卡选择 · 动态真相导演 Demo</p>
-    <div class="top-actions"><button id="backHomeBtn" class="ghost">返回关卡选择</button></div>
-  </header>
+    <div class="portrait-shell">
+      <header id="gameHeader" class="portrait-header">
+        <div class="header-line">
+          <button id="backHomeBtn" class="ghost small-btn">返回</button>
+          <div class="header-title-wrap">
+            <h1 id="puzzleTitle">谜题</h1>
+            <p id="headerSubtitle">动态真相导演 Demo</p>
+          </div>
+          <button id="newGameBtn" class="ghost small-btn">新局</button>
+        </div>
+        <span id="versionBadge" class="version-pill">v2.4-portrait-map-notes</span>
+      </header>
 
-  <main>
-    <section>
-      <h2 id="puzzleTitle">谜题</h2>
-      <div id="storyCard" class="story-card">
-        <div>停电后的钟楼旅馆里，地上留下了一枚摔裂的怀表。</div>
-        <div class="quote">“他们曾在某个房间短暂碰面。”</div>
-        <div>六位客人在夜里不断移动，没人说得清完整行踪。</div>
-        <div class="small">规则补充：每个时间段，所有人都会移动到相邻房间，不能停留原地。</div>
-        <div><b>找出那次秘密碰面的时间、地点，以及当时在场的两个人。</b></div>
-      </div>
-      <div class="row">
-        <button id="newGameBtn" class="primary">新开一局</button>
-      </div>
-      <div id="status" class="status" style="margin-top:10px;"></div>
+      <section class="story-strip">
+        <details>
+          <summary>题面与规则</summary>
+          <div id="storyCard" class="story-card"></div>
+          <div id="status" class="status portrait-status"></div>
+        </details>
+      </section>
 
-      <h3>地图联通</h3>
-      <div class="small">A-B / A-C / B-C / C-D / D-E / D-F / E-F</div>
-      <div id="map" class="map"></div>
-      <h3>初始站位</h3>
-      <div id="initialList"></div>
-    </section>
+      <nav class="time-tabs" id="timeTabs"></nav>
 
-    <section>
-      <h2>调查</h2>
-      <div class="small" id="mobileHint" style="margin-bottom:8px;">手机端如果点不开下拉框，请用 Safari 打开，不要用微信/QQ内置预览；本版本已把下拉框改成整行大按钮，并内置静态选项兜底。</div>
-      <div class="status">
-        每次调查选择一种：<br>
-        <b>时间 + 地点</b>：公开该时间该地点有几人，私密其中一个人是谁。若为 0 人，不消耗调查次数。<br>
-        <b>角色 + 地点</b>：公开该角色整局到过该地点几次，私密其中一个确定时间。
-      </div>
+      <main class="portrait-main">
+        <div class="current-map-topline">
+          <div><b id="currentTimeLabel">T1</b> 推理地图</div>
+          <div class="small">点地点可添加玩家标注</div>
+        </div>
+        <div id="map" class="portrait-map-wrap"></div>
+        <div id="initialList" class="initial-inline"></div>
 
-      <h3>调查方式</h3>
-      <div class="row">
-        <label><input type="radio" name="mode" value="time_location" checked> 时间 + 地点</label>
-        <label><input type="radio" name="mode" value="character_location"> 角色 + 地点</label>
-      </div>
+        <section class="visit-panel">
+          <div class="panel-title">人物到访线索</div>
+          <div id="characterVisitBoard" class="visit-board portrait-visit-board"></div>
+        </section>
 
-      <div id="timeLocationPanel" class="row" style="margin-top:10px;">
-        <label>时间</label><select id="timeSelect"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
-        <label>地点</label><select id="locationSelect1"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
-      </div>
-      <div id="characterLocationPanel" class="row" style="margin-top:10px; display:none;">
-        <label>角色</label><select id="characterSelect"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
-        <label>地点</label><select id="locationSelect2"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
-      </div>
-      <div class="row" style="margin-top:12px;">
-        <button id="investigateBtn" class="primary">调查</button>
-        <button id="lockTruthBtn" class="ghost">提前锁定真相</button>
-      </div>
+        <section class="log-panel">
+          <details>
+            <summary>线索记录 / 复盘</summary>
+            <div id="log" class="log"></div>
+            <h3>最终复盘</h3>
+            <div id="finalResult" class="result-box">尚未揭示真相。</div>
+          </details>
+        </section>
 
-      <h3>提交答案</h3>
-      <div class="row">
-        <label>时间</label><select id="answerTime"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
-        <label>地点</label><select id="answerLocation"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
-        <label>人物1</label><select id="answerChar1"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
-        <label>人物2</label><select id="answerChar2"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
-        <button id="submitBtn">提交</button>
-      </div>
-      <div class="small" style="margin-top:8px;">提交时会先判断当前线索是否已经能唯一锁定答案；如果证据不足，会提示继续调查。</div>
+        <details class="debug-box dev-panel">
+          <summary>开发者调试</summary>
+          <div class="row" style="margin:8px 0;">
+            <button id="lockTruthBtn" class="ghost">提前锁定真相</button>
+            <button id="refreshDebugBtnTop" class="ghost">刷新 log</button>
+            <button id="copyDebugBtnTop" class="primary">复制调试 log</button>
+          </div>
+          <div class="small" style="margin:6px 0 8px;">系统自动推理表只用于调试；玩家正式推理看主地图和自己的标注。</div>
+          <div id="domainTable" style="margin-top:8px;"></div>
+          <textarea id="debugLog" class="debug-log" readonly placeholder="发现矛盾时，点“刷新 log”，再复制给我。"></textarea>
+          <div style="display:none;"><button id="refreshDebugBtn"></button><button id="copyDebugBtn"></button></div>
+        </details>
+      </main>
 
-      <h3>玩家推理图</h3>
-      <div class="small">这里不显示系统自动推理出的候选域，只把玩家已经拿到的线索画出来：T1 显示初始站位；时间+地点线索会在对应地图地点上画人数；角色+地点线索会记在人物头像旁边。</div>
-      <div class="reason-board">
-        <div id="playerTimelineMaps" class="timeline-grid"></div>
-        <h3 style="margin-top:12px;">人物到访记录</h3>
-        <div id="characterVisitBoard" class="visit-board"></div>
-      </div>
+      <footer class="bottom-actions">
+        <button id="openInvestigationBtn" class="primary">调查</button>
+        <button id="openCluesBtn" class="ghost">线索</button>
+        <button id="openSubmitBtn" class="ghost">提交</button>
+      </footer>
+    </div>
 
-      <details class="debug-box">
-        <summary>调试：系统自动推理表</summary>
-        <div class="small" style="margin:6px 0 8px;">这个表只给开发调试看，会显示系统约束传播后的候选域；正式玩法不建议默认展开。</div>
-        <div id="domainTable" style="margin-top:8px;"></div>
-      </details>
-    </section>
-
-    <section>
-      <h2>线索记录</h2>
-      <div class="hint"><b>当前版本：</b>v2.3-visual-reasoning-board<br>如果你看不到下面的“调试 Log / 复制 log”，说明打开的是旧文件。</div>
-      <div class="row" style="margin:8px 0 10px;">
-        <button id="copyDebugBtnTop" class="primary">复制调试 log</button>
-        <button id="refreshDebugBtnTop" class="ghost">刷新 log</button>
-      </div>
-      <div id="log" class="log"></div>
-      <h3>最终复盘</h3>
-      <div id="finalResult" class="result-box">尚未揭示真相。</div>
-      <h3>调试 Log</h3>
-      <div class="row" style="margin-bottom:8px;">
-        <button id="refreshDebugBtn" class="ghost">刷新 log</button>
-        <button id="copyDebugBtn" class="ghost">复制 log</button>
-      </div>
-      <textarea id="debugLog" class="debug-log" readonly placeholder="发现矛盾时，点“刷新 log”，再复制给我。"></textarea>
-    </section>
-  </main>
+    <div class="legacy-controls" aria-hidden="true">
+      <label><input type="radio" name="mode" value="time_location" checked> 时间 + 地点</label>
+      <label><input type="radio" name="mode" value="character_location"> 角色 + 地点</label>
+      <div id="timeLocationPanel"><select id="timeSelect"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select><select id="locationSelect1"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select></div>
+      <div id="characterLocationPanel"><select id="characterSelect"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select><select id="locationSelect2"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select></div>
+      <button id="investigateBtn">调查</button>
+      <select id="answerTime"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
+      <select id="answerLocation"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
+      <select id="answerChar1"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
+      <select id="answerChar2"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
+      <button id="submitBtn">提交</button>
+      <div id="playerTimelineMaps"></div>
+    </div>
   </div>
 
+  <div id="investigationModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-head"><h2>调查</h2><button class="ghost close-modal" data-close="investigationModal">关闭</button></div>
+      <div class="segmented" id="investigationModeButtons"><button data-mode="time_location" class="active">时间 + 地点</button><button data-mode="character_location">角色 + 地点</button></div>
+      <div id="investigationTL" class="modal-section"><h3>选择时间</h3><div class="choice-grid" data-target="modalTLTime"></div><h3>选择地点</h3><div class="choice-grid" data-target="modalTLLocation"></div></div>
+      <div id="investigationCL" class="modal-section" style="display:none;"><h3>选择角色</h3><div class="choice-grid" data-target="modalCLCharacter"></div><h3>选择地点</h3><div class="choice-grid" data-target="modalCLLocation"></div></div>
+      <button id="modalInvestigateBtn" class="primary modal-main-btn">开始调查</button>
+    </div>
+  </div>
+
+  <div id="noteModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-head"><h2 id="noteModalTitle">地点标注</h2><button class="ghost close-modal" data-close="noteModal">关闭</button></div>
+      <div class="small">这是玩家自己的笔记，不会影响系统真相。给当前时间的地点标记“可能在 / 不可能在”。</div>
+      <h3>选择角色</h3><div class="choice-grid" data-target="noteCharacter"></div>
+      <div class="note-actions"><button id="markMaybeBtn" class="primary">可能在</button><button id="markNotBtn" class="danger">不可能在</button><button id="clearNoteBtn" class="ghost">清除标注</button></div>
+    </div>
+  </div>
+
+  <div id="submitModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-head"><h2>提交答案</h2><button class="ghost close-modal" data-close="submitModal">关闭</button></div>
+      <h3>时间</h3><div class="choice-grid" data-target="answerTimeChoice"></div>
+      <h3 id="answerLocationTitle">地点</h3><div class="choice-grid" data-target="answerLocationChoice"></div>
+      <h3>人物 1</h3><div class="choice-grid" data-target="answerChar1Choice"></div>
+      <h3>人物 2</h3><div class="choice-grid" data-target="answerChar2Choice"></div>
+      <button id="modalSubmitBtn" class="primary modal-main-btn">提交</button>
+    </div>
+  </div>
 <script>
 'use strict';
 
@@ -717,7 +786,7 @@ const puzzleConfigs = {
     id: 'puzzle_c',
     title: '谜题 1：C 房间的密信',
     subtitle: '谜题 1：C 房间的密信 · 固定地点型',
-    version: 'v2.3-visual-reasoning-board / puzzle-c',
+    version: 'v2.4-portrait-map-notes / puzzle-c',
     storyHtml: `
         <div>停电后的钟楼旅馆里，C 房间留下了一封被烧毁的密信。</div>
         <div class="quote">“那场秘密交易发生时，C 房间里正好有两个人。”</div>
@@ -737,7 +806,7 @@ const puzzleConfigs = {
     id: 'secret_meeting',
     title: '谜题 2：秘密碰面',
     subtitle: '谜题 2：秘密碰面 · 隐藏地点型',
-    version: 'v2.3-visual-reasoning-board / secret-meeting',
+    version: 'v2.4-portrait-map-notes / secret-meeting',
     storyHtml: `
         <div>停电后的钟楼旅馆里，地上留下了一枚摔裂的怀表。</div>
         <div class="quote">“他们曾在某个房间短暂碰面。”</div>
@@ -2305,9 +2374,81 @@ ${makeDebugSnapshot()}`;
   try { renderStatus(); } catch (e) {}
 });
 
+
+
+// ===== v2.4 竖屏地图主界面与玩家标注 =====
+let currentViewTime = 'T1';
+let modalInvestigationMode = 'time_location';
+const modalSelections = { modalTLTime:'T1', modalTLLocation:'A', modalCLCharacter:'甲', modalCLLocation:'A', noteCharacter:'甲', answerTimeChoice:'T1', answerLocationChoice:'A', answerChar1Choice:'甲', answerChar2Choice:'乙' };
+let activeNoteTarget = { time:'T1', location:'A' };
+
+function ensurePlayerNotes() {
+  if (!state) return {};
+  if (!state.playerNotes) {
+    state.playerNotes = {};
+    for (const t of times) { state.playerNotes[t] = {}; for (const loc of locations) state.playerNotes[t][loc] = {}; }
+  }
+  return state.playerNotes;
+}
+function setCurrentViewTime(t) {
+  currentViewTime = t;
+  modalSelections.modalTLTime = t; modalSelections.answerTimeChoice = t;
+  const timeSelect = document.getElementById('timeSelect'); const answerTime = document.getElementById('answerTime');
+  if (timeSelect) timeSelect.value = t; if (answerTime) answerTime.value = t;
+  renderTimeTabs(); renderMap();
+}
+function renderTimeTabs() {
+  const el = document.getElementById('timeTabs'); if (!el) return;
+  el.innerHTML = times.map(t => `<button class="time-tab ${t===currentViewTime?'active':''}" data-time="${t}">${t}</button>`).join('');
+  el.querySelectorAll('button[data-time]').forEach(btn => btn.addEventListener('click', () => setCurrentViewTime(btn.dataset.time)));
+  const label = document.getElementById('currentTimeLabel'); if (label) label.textContent = currentViewTime;
+}
+function renderBigEdgesSvg() {
+  const coords = getMapCoords(); const edges = [['A','B'], ['A','C'], ['B','C'], ['C','D'], ['D','E'], ['D','F'], ['E','F']];
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${edges.map(([a,b]) => { const p1=coords[a], p2=coords[b]; return `<line class="big-edge" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />`; }).join('')}</svg>`;
+}
+function renderNoteRow(time, loc) {
+  const notes = ensurePlayerNotes(); const locNotes = notes?.[time]?.[loc] || {}; const parts=[];
+  for (const ch of characters) { if (locNotes[ch] === 'maybe') parts.push(`<span class="note-token maybe">${ch}?</span>`); if (locNotes[ch] === 'not') parts.push(`<span class="note-token not">${ch}</span>`); }
+  return parts.length ? `<div class="note-row">${parts.join('')}</div>` : '';
+}
+function renderMap() {
+  const map = document.getElementById('map'); if (!map) return;
+  const time = currentViewTime || 'T1'; const coords = getMapCoords(); let html = `<div class="portrait-big-map">${renderBigEdgesSvg()}`;
+  for (const loc of locations) { const p = coords[loc]; const confirmed = getConfirmedCharsForTimeLocation(time, loc); const knownCount = getKnownCountForTimeLocation(time, loc); const hasCount = knownCount !== null; const zeroKnown = hasCount && knownCount === 0; const unknownCount = hasCount ? Math.max(0, knownCount - confirmed.length) : 0; const cls = zeroKnown ? 'big-node zero-info' : (confirmed.length || hasCount ? 'big-node has-info' : 'big-node'); const countLabel = hasCount ? `<div class="count-line">${knownCount}人</div>` : ''; html += `<button class="${cls}" data-note-loc="${loc}" style="left:${p.x}%; top:${p.y}%;"><div class="loc-id">${loc}</div>${countLabel}${renderTokenRow(confirmed, unknownCount, zeroKnown)}${renderNoteRow(time, loc)}</button>`; }
+  html += '</div>'; map.innerHTML = html; map.querySelectorAll('[data-note-loc]').forEach(btn => btn.addEventListener('click', () => openNoteModal(time, btn.dataset.noteLoc))); renderTimeTabs();
+}
+function renderPlayerReasoningBoard() { renderMap(); }
+function openModal(id) { const el = document.getElementById(id); if (el) el.style.display = 'flex'; }
+function closeModal(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+function renderChoiceGroup(target, values, selected) {
+  const el = document.querySelector(`[data-target="${target}"]`); if (!el) return;
+  el.innerHTML = values.map(v => `<button type="button" data-value="${v}" class="${v===selected?'active':''}">${v}</button>`).join('');
+  el.querySelectorAll('button[data-value]').forEach(btn => btn.addEventListener('click', () => { modalSelections[target] = btn.dataset.value; renderChoiceGroup(target, values, modalSelections[target]); syncModalSelectionsToHiddenControls(); }));
+}
+function renderAllChoiceGroups() { renderChoiceGroup('modalTLTime', times, modalSelections.modalTLTime); renderChoiceGroup('modalTLLocation', locations, modalSelections.modalTLLocation); renderChoiceGroup('modalCLCharacter', characters, modalSelections.modalCLCharacter); renderChoiceGroup('modalCLLocation', locations, modalSelections.modalCLLocation); renderChoiceGroup('noteCharacter', characters, modalSelections.noteCharacter); renderChoiceGroup('answerTimeChoice', times, modalSelections.answerTimeChoice); renderChoiceGroup('answerLocationChoice', locations, modalSelections.answerLocationChoice); renderChoiceGroup('answerChar1Choice', characters, modalSelections.answerChar1Choice); renderChoiceGroup('answerChar2Choice', characters, modalSelections.answerChar2Choice); }
+function syncModalSelectionsToHiddenControls() { const byId = { timeSelect:modalSelections.modalTLTime, locationSelect1:modalSelections.modalTLLocation, characterSelect:modalSelections.modalCLCharacter, locationSelect2:modalSelections.modalCLLocation, answerTime:modalSelections.answerTimeChoice, answerLocation:modalSelections.answerLocationChoice, answerChar1:modalSelections.answerChar1Choice, answerChar2:modalSelections.answerChar2Choice }; for (const [id,val] of Object.entries(byId)) { const el=document.getElementById(id); if (el) el.value=val; } }
+function setInvestigationMode(mode) { modalInvestigationMode = mode; document.querySelectorAll('#investigationModeButtons button').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); const tl=document.getElementById('investigationTL'), cl=document.getElementById('investigationCL'); if(tl) tl.style.display = mode === 'time_location' ? '' : 'none'; if(cl) cl.style.display = mode === 'character_location' ? '' : 'none'; const radio = document.querySelector(`input[name="mode"][value="${mode}"]`); if (radio) radio.checked = true; }
+function openInvestigationModal() { modalSelections.modalTLTime = currentViewTime; syncModalSelectionsToHiddenControls(); renderAllChoiceGroups(); setInvestigationMode(modalInvestigationMode || 'time_location'); openModal('investigationModal'); }
+function runModalInvestigation() { syncModalSelectionsToHiddenControls(); let inv; if (modalInvestigationMode === 'time_location') inv = { type:'time_location', time:modalSelections.modalTLTime, location:modalSelections.modalTLLocation }; else inv = { type:'character_location', character:modalSelections.modalCLCharacter, location:modalSelections.modalCLLocation }; handleInvestigation(inv); const history = state?.ledger?.investigationHistory || []; const last = history[history.length - 1]; if (last?.response?.type === 'time_location') setCurrentViewTime(last.response.time); if (last?.response?.type === 'character_location' && last.response.knownTime) setCurrentViewTime(last.response.knownTime); closeModal('investigationModal'); }
+function openNoteModal(time, loc) { activeNoteTarget = { time, location:loc }; const title=document.getElementById('noteModalTitle'); if(title) title.textContent = `${time} · 地点 ${loc} 标注`; renderChoiceGroup('noteCharacter', characters, modalSelections.noteCharacter); openModal('noteModal'); }
+function setPlayerNote(status) { if(!state) return; const notes=ensurePlayerNotes(); const {time, location}=activeNoteTarget; const ch=modalSelections.noteCharacter; if(!notes[time]) notes[time]={}; if(!notes[time][location]) notes[time][location]={}; if(status==='clear') delete notes[time][location][ch]; else notes[time][location][ch]=status; renderMap(); }
+function openSubmitModal() { modalSelections.answerTimeChoice=currentViewTime; const ttl=document.getElementById('answerLocationTitle'); const locGroup=document.querySelector('[data-target="answerLocationChoice"]'); if(ttl) ttl.style.display = currentPuzzle.answerNeedsLocation ? '' : 'none'; if(locGroup) locGroup.style.display = currentPuzzle.answerNeedsLocation ? 'grid' : 'none'; renderAllChoiceGroups(); openModal('submitModal'); }
+function runModalSubmit() { syncModalSelectionsToHiddenControls(); submitAnswer(); closeModal('submitModal'); }
+function openCluesModalLikePanel() { const details=document.querySelector('.log-panel details'); if(details){ details.open=!details.open; details.scrollIntoView({behavior:'smooth', block:'start'}); } }
+function initMobileUI() {
+  renderAllChoiceGroups(); renderTimeTabs();
+  document.getElementById('openInvestigationBtn')?.addEventListener('click', openInvestigationModal); document.getElementById('openSubmitBtn')?.addEventListener('click', openSubmitModal); document.getElementById('openCluesBtn')?.addEventListener('click', openCluesModalLikePanel); document.getElementById('modalInvestigateBtn')?.addEventListener('click', runModalInvestigation); document.getElementById('modalSubmitBtn')?.addEventListener('click', runModalSubmit); document.getElementById('markMaybeBtn')?.addEventListener('click', () => setPlayerNote('maybe')); document.getElementById('markNotBtn')?.addEventListener('click', () => setPlayerNote('not')); document.getElementById('clearNoteBtn')?.addEventListener('click', () => setPlayerNote('clear')); document.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close))); document.querySelectorAll('.modal-backdrop').forEach(back => back.addEventListener('click', (e) => { if(e.target === back) closeModal(back.id); })); document.querySelectorAll('#investigationModeButtons button').forEach(btn => btn.addEventListener('click', () => setInvestigationMode(btn.dataset.mode)));
+}
+const oldStartNewGameV24 = startNewGame;
+startNewGame = function() { oldStartNewGameV24(); currentViewTime='T1'; if(state) state.playerNotes=null; modalSelections.modalTLTime='T1'; modalSelections.answerTimeChoice='T1'; renderAllChoiceGroups(); renderTimeTabs(); renderMap(); };
+const oldApplyPuzzleUIV24 = applyPuzzleUI;
+applyPuzzleUI = function() { oldApplyPuzzleUIV24(); const versionEl=document.getElementById('versionBadge'); if(versionEl) versionEl.textContent = `${currentPuzzle.version.replace('v2.3-visual-reasoning-board','v2.4-portrait-map-notes')}`; };
+
 function bootApp() {
   try {
     initUI();
+    initMobileUI();
     startNewGame();
   } catch (e) {
     const box = document.getElementById('debugLog');
