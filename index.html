@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动态时空神探 Demo v1.6-mobile-file-fallback</title>
+  <style>
+    :root {
+      --bg: #f8f0df;
+      --panel: #fff8ea;
+      --line: #8b5a2b;
+      --dark: #3b2a1a;
+      --soft: #ead4ad;
+      --good: #236b3a;
+      --bad: #9b2d20;
+      --accent: #b8752b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+    }
+    header {
+      padding: 18px 22px;
+      background: #56371e;
+      color: #fff7e8;
+      border-bottom: 4px solid #2f1d0e;
+    }
+    header h1 { margin: 0 0 6px; font-size: 24px; }
+    header p { margin: 0; opacity: 0.9; }
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr 390px;
+      gap: 14px;
+      padding: 14px;
+    }
+    section {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+    }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    h3 { margin: 14px 0 8px; font-size: 15px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .stack { display: grid; gap: 8px; }
+    button, select {
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #7a552c;
+      background: #fffdf7;
+      color: var(--dark);
+      padding: 8px 10px;
+    }
+    button {
+      cursor: pointer;
+      background: #f2c879;
+      font-weight: 700;
+    }
+    button:hover { filter: brightness(1.03); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .danger { background: #e89082; }
+    .primary { background: #f4b24b; }
+    .ghost { background: #fff8ea; }
+    .pill {
+      display: inline-flex;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      border: 1px solid #9f7845;
+      font-size: 13px;
+      margin: 2px;
+    }
+    .map {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .loc {
+      min-height: 74px;
+      background: #f7e2bd;
+      border: 2px solid #9a6a36;
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .loc strong { font-size: 18px; }
+    .char-list { font-size: 13px; line-height: 1.5; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #fffdf8;
+    }
+    th, td {
+      border: 1px solid #c49b68;
+      padding: 6px;
+      text-align: center;
+    }
+    th { background: #edd1a6; }
+    .log {
+      max-height: 330px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .log-item {
+      border-left: 4px solid var(--accent);
+      background: #fffdf8;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .public { color: #4d321b; font-weight: 700; }
+    .private { color: #7b2e15; }
+    .status {
+      background: #fffdf8;
+      border: 1px dashed #9f7845;
+      border-radius: 10px;
+      padding: 10px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .ok { color: var(--good); font-weight: 700; }
+    .bad { color: var(--bad); font-weight: 700; }
+    .small { font-size: 12px; opacity: .84; }
+    .result-box {
+      white-space: pre-wrap;
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 240px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    textarea.debug-log {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      white-space: pre;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+    }
+    /* v1.1：iPhone / 小屏修复。避免 select 在 flex 行里被挤到 0 宽或显示成不可点区域。 */
+
+    .story-card {
+      background: #fffdf8;
+      border: 1px solid #c49b68;
+      border-radius: 12px;
+      padding: 12px;
+      line-height: 1.65;
+      margin: 10px 0 12px;
+    }
+    .story-card .quote {
+      margin: 8px 0;
+      padding: 8px 10px;
+      background: #f7e2bd;
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    @media (max-width: 700px) {
+      header { padding: 14px 12px; }
+      header h1 { font-size: 20px; }
+      main { padding: 8px; gap: 10px; }
+      section { padding: 10px; border-radius: 10px; }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        align-items: stretch;
+      }
+      button, select {
+        width: 100%;
+        min-height: 42px;
+        font-size: 16px;
+        padding: 10px 12px;
+      }
+      select {
+        display: block;
+        -webkit-appearance: menulist;
+        appearance: menulist;
+        background-color: #fffdf7;
+        color: var(--dark);
+      }
+      #timeLocationPanel, #characterLocationPanel {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .map { grid-template-columns: repeat(2, 1fr); }
+      .log { max-height: 220px; }
+      table { font-size: 12px; }
+      th, td { padding: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>动态时空神探 Demo <span style="font-size:14px; padding:3px 8px; border:1px solid #fff7e8; border-radius:999px; vertical-align:middle;">v1.6-mobile-file-fallback</span></h1>
+    <p>固定 C 谜题 · 阶段性最终版</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>谜题</h2>
+      <div class="story-card">
+        <div>停电后的钟楼旅馆里，C 房间留下了一封被烧毁的密信。</div>
+        <div class="quote">“那场秘密交易发生时，C 房间里正好有两个人。”</div>
+        <div>六位客人在夜里不断移动，没人说得清完整行踪。</div>
+        <div><b>找出那唯一的时间点，以及当时在 C 房间里的两个人。</b></div>
+      </div>
+      <div class="row">
+        <button id="newGameBtn" class="primary">新开一局</button>
+      </div>
+      <div id="status" class="status" style="margin-top:10px;"></div>
+
+      <h3>地图联通</h3>
+      <div class="small">A-B / A-C / B-C / C-D / D-E / D-F / E-F</div>
+      <div id="map" class="map"></div>
+      <h3>初始站位</h3>
+      <div id="initialList"></div>
+    </section>
+
+    <section>
+      <h2>调查</h2>
+      <div class="small" id="mobileHint" style="margin-bottom:8px;">手机端如果点不开下拉框，请用 Safari 打开，不要用微信/QQ内置预览；本版本已把下拉框改成整行大按钮，并内置静态选项兜底。</div>
+      <div class="status">
+        每次调查选择一种：<br>
+        <b>时间 + 地点</b>：公开该时间该地点有几人，私密其中一个人是谁。若为 0 人，不消耗调查次数。<br>
+        <b>角色 + 地点</b>：公开该角色整局到过该地点几次，私密其中一个确定时间。
+      </div>
+
+      <h3>调查方式</h3>
+      <div class="row">
+        <label><input type="radio" name="mode" value="time_location" checked> 时间 + 地点</label>
+        <label><input type="radio" name="mode" value="character_location"> 角色 + 地点</label>
+      </div>
+
+      <div id="timeLocationPanel" class="row" style="margin-top:10px;">
+        <label>时间</label><select id="timeSelect"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
+        <label>地点</label><select id="locationSelect1"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
+      </div>
+      <div id="characterLocationPanel" class="row" style="margin-top:10px; display:none;">
+        <label>角色</label><select id="characterSelect"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
+        <label>地点</label><select id="locationSelect2"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button id="investigateBtn" class="primary">调查</button>
+        <button id="lockTruthBtn" class="ghost">提前锁定真相</button>
+      </div>
+
+      <h3>提交答案</h3>
+      <div class="row">
+        <label>时间</label><select id="answerTime"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option></select>
+        <label>人物1</label><select id="answerChar1"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
+        <label>人物2</label><select id="answerChar2"><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option></select>
+        <button id="submitBtn">提交</button>
+      </div>
+      <div class="small" style="margin-top:8px;">提交时会先判断当前线索是否已经能唯一锁定答案；如果证据不足，会提示继续调查。</div>
+
+      <h3>推理表</h3>
+      <div class="small">这个表不会自动填满，只显示系统已承诺/已排除的信息。</div>
+      <div id="domainTable" style="margin-top:8px;"></div>
+    </section>
+
+    <section>
+      <h2>线索记录</h2>
+      <div class="hint"><b>当前版本：</b>v1.6-mobile-file-fallback<br>如果你看不到下面的“调试 Log / 复制 log”，说明打开的是旧文件。</div>
+      <div class="row" style="margin:8px 0 10px;">
+        <button id="copyDebugBtnTop" class="primary">复制调试 log</button>
+        <button id="refreshDebugBtnTop" class="ghost">刷新 log</button>
+      </div>
+      <div id="log" class="log"></div>
+      <h3>最终复盘</h3>
+      <div id="finalResult" class="result-box">尚未揭示真相。</div>
+      <h3>调试 Log</h3>
+      <div class="row" style="margin-bottom:8px;">
+        <button id="refreshDebugBtn" class="ghost">刷新 log</button>
+        <button id="copyDebugBtn" class="ghost">复制 log</button>
+      </div>
+      <textarea id="debugLog" class="debug-log" readonly placeholder="发现矛盾时，点“刷新 log”，再复制给我。"></textarea>
+    </section>
+  </main>
+
+<script>
+'use strict';
+
+const characters = ['甲', '乙', '丙', '丁', '戊', '己'];
+const locations = ['A', 'B', 'C', 'D', 'E', 'F'];
+const times = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
+const adjacency = {
+  A: ['B', 'C'],
+  B: ['A', 'C'],
+  C: ['A', 'B', 'D'],
+  D: ['C', 'E', 'F'],
+  E: ['D', 'F'],
+  F: ['D', 'E']
+};
+
+const mystery = {
+  targetLocation: 'C',
+  requiredCount: 2,
+  requireUniqueTime: true
+};
+
+const plans = {
+  4: {
+    name: '4 回合速解',
+    targetTurns: 4,
+    preferredStrengthByTurn: [6, 7, 8, 10],
+    maxZeroClues: 3,
+    minDecoyClues: 0,
+    allowCEqualsTwoFromTurn: 2,
+    forceConvergeFromTurn: 4,
+    preferDecoyBeforeTurn: 1,
+    enforceAnswerPacing: true
+  },
+  8: {
+    name: '8 回合慢推',
+    targetTurns: 8,
+    preferredStrengthByTurn: [2, 2, 3, 3, 4, 5, 7, 10],
+    maxZeroClues: 1,
+    minDecoyClues: 3,
+    allowCEqualsTwoFromTurn: 6,
+    forceConvergeFromTurn: 8,
+    preferDecoyBeforeTurn: 6,
+    enforceAnswerPacing: true
+  },
+  standard: {
+    name: '标准动态导演（无目标回合）',
+    targetTurns: 999,
+    preferredStrengthByTurn: [4, 4, 5, 5, 6, 6, 7, 7],
+    maxZeroClues: 2,
+    minDecoyClues: 0,
+    allowCEqualsTwoFromTurn: 1,
+    forceConvergeFromTurn: 999,
+    preferDecoyBeforeTurn: 0,
+    enforceAnswerPacing: false
+  }
+};
+
+let state = null;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function makeInitialPositions() {
+  const shuffled = shuffle(locations);
+  const result = {};
+  characters.forEach((ch, idx) => result[ch] = shuffled[idx]);
+  return result;
+}
+
+function newState(plan) {
+  const initialPositions = makeInitialPositions();
+  const domains = createInitialDomains(characters, times, locations, initialPositions);
+  const ledger = {
+    fixedPositions: [],
+    forbiddenPositions: [],
+    timeLocationCounts: [],
+    knownOccupants: [],
+    characterLocationCounts: [],
+    knownVisitTimes: [],
+    zeroClueCount: 0,
+    cEqualsTwoClueCount: 0,
+    decoyClueCount: 0,
+    investigationHistory: []
+  };
+  for (const ch of characters) {
+    ledger.fixedPositions.push({ character: ch, time: 'T1', location: initialPositions[ch] });
+  }
+  const s = {
+    characters,
+    locations,
+    times,
+    adjacency,
+    initialPositions,
+    domains,
+    ledger,
+    mystery,
+    plan,
+    lockedTruth: null,
+    gameOver: false,
+    message: ''
+  };
+  propagateMovement(s.domains, characters, times, adjacency);
+  enforceCountConstraintsByDomains(s);
+  tightenDomainsByIndividualPaths(s);
+  enforceCountConstraintsByDomains(s);
+  return s;
+}
+
+function createInitialDomains(chars, ts, locs, initialPositions) {
+  const domains = {};
+  for (const ch of chars) {
+    domains[ch] = {};
+    for (const t of ts) domains[ch][t] = new Set(locs);
+    domains[ch][ts[0]] = new Set([initialPositions[ch]]);
+  }
+  return domains;
+}
+
+function setEquals(a, b) {
+  if (a.size !== b.size) return false;
+  for (const x of a) if (!b.has(x)) return false;
+  return true;
+}
+
+function propagateMovement(domains, chars, ts, adj) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const ch of chars) {
+      for (let i = 0; i < ts.length - 1; i++) {
+        const t1 = ts[i], t2 = ts[i + 1];
+        const before1 = new Set(domains[ch][t1]);
+        const before2 = new Set(domains[ch][t2]);
+        const filteredT1 = new Set();
+        for (const loc1 of domains[ch][t1]) {
+          const neighbors = adj[loc1] || [];
+          if ([...domains[ch][t2]].some(loc2 => neighbors.includes(loc2))) filteredT1.add(loc1);
+        }
+        const filteredT2 = new Set();
+        for (const loc2 of domains[ch][t2]) {
+          if ([...domains[ch][t1]].some(loc1 => (adj[loc1] || []).includes(loc2))) filteredT2.add(loc2);
+        }
+        domains[ch][t1] = filteredT1;
+        domains[ch][t2] = filteredT2;
+        if (!setEquals(before1, filteredT1) || !setEquals(before2, filteredT2)) changed = true;
+        if (filteredT1.size === 0 || filteredT2.size === 0) return false;
+      }
+    }
+  }
+  return true;
+}
+
+function cloneState(s) {
+  const domains = {};
+  for (const ch of s.characters) {
+    domains[ch] = {};
+    for (const t of s.times) domains[ch][t] = new Set(s.domains[ch][t]);
+  }
+  return {
+    characters: s.characters,
+    locations: s.locations,
+    times: s.times,
+    adjacency: s.adjacency,
+    initialPositions: { ...s.initialPositions },
+    domains,
+    ledger: JSON.parse(JSON.stringify(s.ledger)),
+    mystery: { ...s.mystery },
+    plan: s.plan,
+    lockedTruth: s.lockedTruth,
+    gameOver: s.gameOver,
+    message: s.message
+  };
+}
+
+function hasEmptyDomain(domains, chars, ts) {
+  for (const ch of chars) for (const t of ts) if (domains[ch][t].size === 0) return true;
+  return false;
+}
+
+function getExactTimeLocationCountFromLedger(s, time, location) {
+  for (let i = s.ledger.timeLocationCounts.length - 1; i >= 0; i--) {
+    const clue = s.ledger.timeLocationCounts[i];
+    if (clue.time === time && clue.location === location) return clue.count;
+  }
+  return null;
+}
+
+function getTargetLocationRanges(domains, chars, ts, target, s = null) {
+  const ranges = {};
+  for (const t of ts) {
+    const exact = s ? getExactTimeLocationCountFromLedger(s, t, target) : null;
+    if (exact !== null) {
+      ranges[t] = { min: exact, max: exact, exact: true };
+      continue;
+    }
+    let confirmed = 0;
+    let possible = 0;
+    for (const ch of chars) {
+      const d = domains[ch][t];
+      if (d.size === 1 && d.has(target)) confirmed++;
+      else if (d.has(target)) possible++;
+    }
+    ranges[t] = { min: confirmed, max: confirmed + possible, exact: false };
+  }
+  return ranges;
+}
+
+function getPossibleAnswerTimes(s) {
+  const ranges = getTargetLocationRanges(s.domains, s.characters, s.times, s.mystery.targetLocation, s);
+  const required = s.mystery.requiredCount;
+
+  // v0.8：如果已经公开承诺过某个时间点 C 正好为 required，
+  // 且谜题要求“唯一时间”，那么其他尚未精确公开的人数范围即使还能包含 required，
+  // 也不能再被显示为“可能答案时间”。
+  // 例：已知 T6 C=2，则 T3 的范围 0~3 不能继续显示为答案候选，
+  // 因为 T3 再变成 2 会违反“唯一一个时间点 C=2”。
+  const exactRequiredTimes = s.times.filter(t => ranges[t].exact && ranges[t].min === required);
+  if (s.mystery.requireUniqueTime && exactRequiredTimes.length > 0) {
+    return exactRequiredTimes;
+  }
+
+  return s.times.filter(t => ranges[t].min <= required && required <= ranges[t].max);
+}
+
+function checkMysteryPossibleLight(s) {
+  const ranges = getTargetLocationRanges(s.domains, s.characters, s.times, s.mystery.targetLocation, s);
+  const required = s.mystery.requiredCount;
+  let possible = 0;
+  let exactMatches = 0;
+  for (const t of s.times) {
+    const r = ranges[t];
+    if (r.min <= required && required <= r.max) possible++;
+    if (r.exact && r.min === required) exactMatches++;
+  }
+  if (possible === 0) return false;
+  if (s.mystery.requireUniqueTime && exactMatches > 1) return false;
+  return true;
+}
+
+function generateTimeLocationResponses(investigation, s) {
+  const { time, location } = investigation;
+  const possibleCharacters = s.characters.filter(ch => s.domains[ch][time].has(location));
+  const maxCount = possibleCharacters.length;
+  const candidates = [];
+  for (let count = 0; count <= maxCount; count++) {
+    if (count === 0) {
+      candidates.push({ type: 'time_location', time, location, count, knownCharacter: null });
+    } else {
+      for (const ch of possibleCharacters) {
+        candidates.push({ type: 'time_location', time, location, count, knownCharacter: ch });
+      }
+    }
+  }
+  return candidates;
+}
+
+function generateCharacterLocationResponses(investigation, s) {
+  const { character, location } = investigation;
+  const possibleTimes = s.times.filter(t => s.domains[character][t].has(location));
+  const maxCount = possibleTimes.length;
+  const candidates = [];
+  for (let count = 0; count <= maxCount; count++) {
+    if (count === 0) {
+      candidates.push({ type: 'character_location', character, location, count, knownTime: null });
+    } else {
+      for (const t of possibleTimes) {
+        candidates.push({ type: 'character_location', character, location, count, knownTime: t });
+      }
+    }
+  }
+  return candidates;
+}
+
+function applyTimeLocationResponse(domains, ledger, response, s) {
+  const { time, location, count, knownCharacter } = response;
+  if (count === 0) {
+    for (const ch of s.characters) {
+      domains[ch][time].delete(location);
+      ledger.forbiddenPositions.push({ character: ch, time, location });
+    }
+    ledger.timeLocationCounts.push({ time, location, count });
+    return true;
+  }
+  if (knownCharacter) {
+    domains[knownCharacter][time] = new Set([location]);
+    ledger.fixedPositions.push({ character: knownCharacter, time, location });
+    ledger.knownOccupants.push({ time, location, character: knownCharacter });
+  }
+  if (count === 1 && knownCharacter) {
+    for (const ch of s.characters) {
+      if (ch !== knownCharacter) {
+        domains[ch][time].delete(location);
+        ledger.forbiddenPositions.push({ character: ch, time, location });
+      }
+    }
+  }
+  ledger.timeLocationCounts.push({ time, location, count });
+  return true;
+}
+
+function applyCharacterLocationResponse(domains, ledger, response, s) {
+  const { character, location, count, knownTime } = response;
+  if (count === 0) {
+    for (const t of s.times) {
+      domains[character][t].delete(location);
+      ledger.forbiddenPositions.push({ character, time: t, location });
+    }
+    ledger.characterLocationCounts.push({ character, location, count });
+    return true;
+  }
+  if (knownTime) {
+    domains[character][knownTime] = new Set([location]);
+    ledger.fixedPositions.push({ character, time: knownTime, location });
+    ledger.knownVisitTimes.push({ character, location, time: knownTime });
+  }
+  if (count === 1 && knownTime) {
+    for (const t of s.times) {
+      if (t !== knownTime) {
+        domains[character][t].delete(location);
+        ledger.forbiddenPositions.push({ character, time: t, location });
+      }
+    }
+  }
+  ledger.characterLocationCounts.push({ character, location, count });
+  return true;
+}
+
+function getExactTimeLocationCount(s, time, location) {
+  // 如果同一项被重复记录，以最后一次承诺为准；重复调查本身不会重复写入。
+  for (let i = s.ledger.timeLocationCounts.length - 1; i >= 0; i--) {
+    const clue = s.ledger.timeLocationCounts[i];
+    if (clue.time === time && clue.location === location) return clue.count;
+  }
+  return null;
+}
+
+function checkAdjacentSameLocationCounts(s) {
+  // 硬规则：角色每回合必须移动，不能原地停留。
+  // 因此同一个地点 L 在相邻两个时间点的人数 c(t,L)+c(t+1,L) 不能超过总角色数。
+  // 例：6 人局里，T3 的 C 有 4 人，则这 4 人 T4 必须离开 C，T4 的 C 最多只能由另外 2 人进入。
+  const total = s.characters.length;
+  for (const loc of s.locations) {
+    for (let i = 0; i < s.times.length - 1; i++) {
+      const t1 = s.times[i];
+      const t2 = s.times[i + 1];
+      const c1 = getExactTimeLocationCount(s, t1, loc);
+      const c2 = getExactTimeLocationCount(s, t2, loc);
+      if (c1 !== null && c2 !== null && c1 + c2 > total) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function enforceCountConstraintsByDomains(s) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const clue of s.ledger.timeLocationCounts) {
+      const { time, location, count } = clue;
+      let confirmed = 0;
+      const possibleChars = [];
+      for (const ch of s.characters) {
+        const d = s.domains[ch][time];
+        if (d.size === 1 && d.has(location)) confirmed++;
+        else if (d.has(location)) possibleChars.push(ch);
+      }
+      if (confirmed > count) return false;
+      if (confirmed + possibleChars.length < count) return false;
+      if (confirmed === count) {
+        for (const ch of possibleChars) {
+          const before = s.domains[ch][time].size;
+          s.domains[ch][time].delete(location);
+          if (s.domains[ch][time].size === 0) return false;
+          if (s.domains[ch][time].size !== before) changed = true;
+        }
+      } else if (confirmed + possibleChars.length === count) {
+        for (const ch of possibleChars) {
+          if (!(s.domains[ch][time].size === 1 && s.domains[ch][time].has(location))) {
+            s.domains[ch][time] = new Set([location]);
+            changed = true;
+          }
+        }
+      }
+    }
+
+    for (const clue of s.ledger.characterLocationCounts) {
+      const { character, location, count } = clue;
+      let confirmed = 0;
+      const possibleTimes = [];
+      for (const t of s.times) {
+        const d = s.domains[character][t];
+        if (d.size === 1 && d.has(location)) confirmed++;
+        else if (d.has(location)) possibleTimes.push(t);
+      }
+      if (confirmed > count) return false;
+      if (confirmed + possibleTimes.length < count) return false;
+      if (confirmed === count) {
+        for (const t of possibleTimes) {
+          const before = s.domains[character][t].size;
+          s.domains[character][t].delete(location);
+          if (s.domains[character][t].size === 0) return false;
+          if (s.domains[character][t].size !== before) changed = true;
+        }
+      } else if (confirmed + possibleTimes.length === count) {
+        for (const t of possibleTimes) {
+          if (!(s.domains[character][t].size === 1 && s.domains[character][t].has(location))) {
+            s.domains[character][t] = new Set([location]);
+            changed = true;
+          }
+        }
+      }
+    }
+
+    if (!propagateMovement(s.domains, s.characters, s.times, s.adjacency)) return false;
+  }
+  return true;
+}
+
+function checkCountConstraintsLight(s) {
+  for (const clue of s.ledger.timeLocationCounts) {
+    const { time, location, count } = clue;
+    let confirmed = 0, possible = 0;
+    for (const ch of s.characters) {
+      const d = s.domains[ch][time];
+      if (d.size === 1 && d.has(location)) confirmed++;
+      else if (d.has(location)) possible++;
+    }
+    if (confirmed > count) return false;
+    if (confirmed + possible < count) return false;
+  }
+
+  if (!checkAdjacentSameLocationCounts(s)) return false;
+
+  for (const clue of s.ledger.characterLocationCounts) {
+    const { character, location, count } = clue;
+    let confirmed = 0, possible = 0;
+    for (const t of s.times) {
+      const d = s.domains[character][t];
+      if (d.size === 1 && d.has(location)) confirmed++;
+      else if (d.has(location)) possible++;
+    }
+    if (confirmed > count) return false;
+    if (confirmed + possible < count) return false;
+  }
+  return true;
+}
+
+function generateAllPathsForCharacter(s, ch) {
+  const result = [];
+  const path = [s.initialPositions[ch]];
+  function dfs(timeIndex) {
+    if (timeIndex === s.times.length) {
+      result.push(path.slice());
+      return;
+    }
+    const prev = path[timeIndex - 1];
+    for (const next of s.adjacency[prev] || []) {
+      path.push(next);
+      dfs(timeIndex + 1);
+      path.pop();
+    }
+  }
+  dfs(1);
+  return result;
+}
+
+function pathSatisfiesIndividualLedger(path, ch, s) {
+  const timeIndex = new Map(s.times.map((t, i) => [t, i]));
+  for (const f of s.ledger.fixedPositions) {
+    if (f.character === ch && path[timeIndex.get(f.time)] !== f.location) return false;
+  }
+  for (const f of s.ledger.forbiddenPositions) {
+    if (f.character === ch && path[timeIndex.get(f.time)] === f.location) return false;
+  }
+  for (const c of s.ledger.characterLocationCounts) {
+    if (c.character === ch) {
+      const count = path.filter(loc => loc === c.location).length;
+      if (count !== c.count) return false;
+    }
+  }
+  for (const v of s.ledger.knownVisitTimes) {
+    if (v.character === ch && path[timeIndex.get(v.time)] !== v.location) return false;
+  }
+  return true;
+}
+
+function getFilteredPathsByCharacter(s) {
+  const by = {};
+  for (const ch of s.characters) {
+    const all = generateAllPathsForCharacter(s, ch);
+    by[ch] = all.filter(path => pathSatisfiesIndividualLedger(path, ch, s));
+    if (by[ch].length === 0) return null;
+  }
+  return by;
+}
+
+function tightenDomainsByIndividualPaths(s) {
+  const by = getFilteredPathsByCharacter(s);
+  if (!by) return false;
+  for (const ch of s.characters) {
+    for (let i = 0; i < s.times.length; i++) {
+      const t = s.times[i];
+      const union = new Set();
+      for (const path of by[ch]) union.add(path[i]);
+      s.domains[ch][t] = new Set([...s.domains[ch][t]].filter(x => union.has(x)));
+      if (s.domains[ch][t].size === 0) return false;
+    }
+  }
+  return true;
+}
+
+function isResponseSafe(response, s, plan, turnIndex, options = {}) {
+  const test = cloneState(s);
+  if (response.type === 'time_location') applyTimeLocationResponse(test.domains, test.ledger, response, test);
+  else applyCharacterLocationResponse(test.domains, test.ledger, response, test);
+
+  if (!propagateMovement(test.domains, test.characters, test.times, test.adjacency)) return { ok: false };
+  if (!enforceCountConstraintsByDomains(test)) return { ok: false };
+  if (!tightenDomainsByIndividualPaths(test)) return { ok: false };
+  if (!enforceCountConstraintsByDomains(test)) return { ok: false };
+  if (hasEmptyDomain(test.domains, test.characters, test.times)) return { ok: false };
+  if (!checkCountConstraintsLight(test)) return { ok: false };
+  if (!checkMysteryPossibleLight(test)) return { ok: false };
+
+  const possibleAnswerTimes = getPossibleAnswerTimes(test);
+  if (possibleAnswerTimes.length === 0) return { ok: false };
+
+  // 规模只有 6 人×6 时间，配合个人路径过滤和部分人数剪枝，原型阶段可以接受。
+  if (!canCompleteTimeline(test, null, 7000)) return { ok: false };
+
+  // v1.6：固定 C 谜题阶段性最终版；下拉选项改为 HTML 静态兜底，兼容 iPhone 文件预览/本地打开。
+  // 这里不再调用任何答案组合计数/评估逻辑，只保证线索安全且能补全完整真相。
+  return { ok: true, nextState: test, possibleAnswerTimes };
+}
+
+function getClueStrength(response, s) {
+  let strength = 0;
+  if (response.type === 'time_location') {
+    const isTarget = response.location === s.mystery.targetLocation;
+    if (response.count === 0) strength += 3;
+    if (response.count === 1) strength += 4;
+    if (response.count === s.mystery.requiredCount && isTarget) strength += 7;
+    if (response.count === 3) strength += 2;
+    if (response.knownCharacter) strength += 3;
+  } else {
+    const isTarget = response.location === s.mystery.targetLocation;
+    if (response.count === 0) strength += 5;
+    if (response.count === 1) strength += 5;
+    if (response.count === 2) strength += 3;
+    if (response.count >= 3) strength += 1;
+    if (response.knownTime) strength += 3;
+    if (isTarget) strength += 1;
+  }
+  return strength;
+}
+
+function isDecoyResponse(response, s) {
+  const target = s.mystery.targetLocation;
+  const required = s.mystery.requiredCount;
+  if (response.type === 'time_location') return response.location === target && response.count !== required && response.count > 0;
+  if (response.type === 'character_location') return response.location === target && response.count >= 2;
+  return false;
+}
+
+function getInvestigationKey(inv) {
+  if (inv.type === 'time_location') return `TL:${inv.time}:${inv.location}`;
+  return `CL:${inv.character}:${inv.location}`;
+}
+
+function chooseResponse(investigation, s, plan, turnIndex) {
+  // 重复调查，返回同一条历史结果，不改变系统。
+  const key = getInvestigationKey(investigation);
+  const old = s.ledger.investigationHistory.find(h => h.key === key);
+  if (old) return { repeated: true, response: old.response, strength: old.strength };
+
+  const candidates = investigation.type === 'time_location'
+    ? generateTimeLocationResponses(investigation, s)
+    : generateCharacterLocationResponses(investigation, s);
+
+  function scoreCandidates(options = {}) {
+    const scored = [];
+    for (const response of candidates) {
+      const safe = isResponseSafe(response, s, plan, turnIndex, options);
+      if (!safe.ok) continue;
+      const strength = getClueStrength(response, s);
+      const targetStrength = plan.preferredStrengthByTurn[turnIndex] ?? 5;
+      let score = 0;
+      score -= Math.abs(strength - targetStrength) * 2;
+
+      const decoy = isDecoyResponse(response, s);
+      if (turnIndex + 1 <= plan.preferDecoyBeforeTurn && decoy) score += 4;
+      if (turnIndex + 1 > plan.preferDecoyBeforeTurn && decoy) score -= 1;
+
+      if (response.type === 'time_location' && response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) {
+        if (turnIndex + 1 >= plan.allowCEqualsTwoFromTurn) score += 5;
+        else score -= 10;
+      }
+
+      if (response.type === 'time_location' && response.count === 0) {
+        if (s.ledger.zeroClueCount >= plan.maxZeroClues) score -= 12;
+        else score += plan.targetTurns <= 4 ? 5 : 1;
+      }
+
+
+      if (turnIndex + 1 >= plan.forceConvergeFromTurn) {
+        const n = safe.possibleAnswerTimes.length;
+        if (n === 1) score += 10;
+        else score -= n * 2;
+      }
+
+      // 少量随机扰动，避免每局手感完全一样。
+      score += Math.random() * 0.5;
+      scored.push({
+        response,
+        score,
+        strength,
+        possibleAnswerTimes: safe.possibleAnswerTimes
+      });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored;
+  }
+
+  let scored = scoreCandidates({ allowEarlyUniqueAnswer: false });
+
+  // 如果玩家问了一个过于直击答案的问题，严格控节奏可能没有合法回答。
+  // 这时宁可放松节奏，也不要让系统无响应或提前锁死为错误状态。
+  if (scored.length === 0) scored = scoreCandidates({ allowEarlyUniqueAnswer: true });
+
+  return scored[0] || null;
+}
+
+function commitChosenResponse(chosen, s, investigation, consumeAction) {
+  if (chosen.repeated) return chosen.response;
+  const response = chosen.response;
+  if (response.type === 'time_location') {
+    applyTimeLocationResponse(s.domains, s.ledger, response, s);
+    if (response.count === 0) s.ledger.zeroClueCount++;
+    if (response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
+  } else {
+    applyCharacterLocationResponse(s.domains, s.ledger, response, s);
+  }
+  if (isDecoyResponse(response, s)) s.ledger.decoyClueCount++;
+  propagateMovement(s.domains, s.characters, s.times, s.adjacency);
+  enforceCountConstraintsByDomains(s);
+  tightenDomainsByIndividualPaths(s);
+  enforceCountConstraintsByDomains(s);
+  s.ledger.investigationHistory.push({
+    key: getInvestigationKey(investigation),
+    investigation,
+    response,
+    strength: chosen.strength,
+    consumed: consumeAction
+  });
+  return response;
+}
+
+function checkTimeLocationCountsForPartial(assignedPaths, s, remainingChars) {
+  for (const clue of s.ledger.timeLocationCounts) {
+    const ti = s.times.indexOf(clue.time);
+    let current = 0;
+    for (const ch in assignedPaths) if (assignedPaths[ch][ti] === clue.location) current++;
+    if (current > clue.count) return false;
+
+    let maxMore = 0;
+    for (const ch of remainingChars) {
+      // 这里只用 domains 近似，不再逐 path 检查，便宜剪枝。
+      if (s.domains[ch][clue.time].has(clue.location)) maxMore++;
+    }
+    if (current + maxMore < clue.count) return false;
+  }
+  return true;
+}
+
+function checkFinalLedgerWithTruth(truth, s) {
+  for (const clue of s.ledger.timeLocationCounts) {
+    const count = s.characters.filter(ch => truth[ch][clue.time] === clue.location).length;
+    if (count !== clue.count) return false;
+  }
+  for (const clue of s.ledger.knownOccupants) {
+    if (truth[clue.character][clue.time] !== clue.location) return false;
+  }
+  for (const clue of s.ledger.characterLocationCounts) {
+    const count = s.times.filter(t => truth[clue.character][t] === clue.location).length;
+    if (count !== clue.count) return false;
+  }
+  for (const clue of s.ledger.knownVisitTimes) {
+    if (truth[clue.character][clue.time] !== clue.location) return false;
+  }
+  return true;
+}
+
+function checkMysteryAndGetAnswer(truth, s) {
+  const target = s.mystery.targetLocation;
+  const required = s.mystery.requiredCount;
+  const matches = [];
+  for (const t of s.times) {
+    const people = s.characters.filter(ch => truth[ch][t] === target);
+    if (people.length === required) matches.push({ time: t, location: target, characters: people });
+  }
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function answerEquals(a, b) {
+  if (!a || !b) return false;
+  if (a.time !== b.time) return false;
+  const s1 = [...a.characters].sort().join('|');
+  const s2 = [...b.characters].sort().join('|');
+  return s1 === s2;
+}
+
+function canCompleteTimeline(s, answerConstraint = null, maxNodes = 5000) {
+  const truth = finalizeTimeline(s, answerConstraint, maxNodes);
+  return !!truth;
+}
+
+function finalizeTimeline(s, answerConstraint = null, maxNodes = 12000) {
+  const filtered = getFilteredPathsByCharacter(s);
+  if (!filtered) return null;
+  const order = s.characters.slice().sort((a, b) => filtered[a].length - filtered[b].length);
+  const assigned = {};
+  let nodes = 0;
+
+  function dfs(idx) {
+    nodes++;
+    if (nodes > maxNodes) return null;
+    if (idx === order.length) {
+      const truth = {};
+      for (const ch of s.characters) {
+        truth[ch] = {};
+        assigned[ch].forEach((loc, i) => truth[ch][s.times[i]] = loc);
+      }
+      if (!checkFinalLedgerWithTruth(truth, s)) return null;
+      const ans = checkMysteryAndGetAnswer(truth, s);
+      if (!ans) return null;
+      if (answerConstraint && !answerEquals(ans, answerConstraint)) return null;
+      return truth;
+    }
+    const ch = order[idx];
+    const paths = shuffle(filtered[ch]);
+    const remaining = order.slice(idx + 1);
+    for (const path of paths) {
+      assigned[ch] = path;
+      if (!checkTimeLocationCountsForPartial(assigned, s, remaining)) {
+        delete assigned[ch];
+        continue;
+      }
+      const result = dfs(idx + 1);
+      if (result) return result;
+      delete assigned[ch];
+    }
+    return null;
+  }
+  return dfs(0);
+}
+
+function answerFromTruth(investigation, truth, s) {
+  if (investigation.type === 'time_location') {
+    const people = s.characters.filter(ch => truth[ch][investigation.time] === investigation.location);
+    return {
+      type: 'time_location',
+      time: investigation.time,
+      location: investigation.location,
+      count: people.length,
+      knownCharacter: people[0] || null
+    };
+  }
+  const visitTimes = s.times.filter(t => truth[investigation.character][t] === investigation.location);
+  return {
+    type: 'character_location',
+    character: investigation.character,
+    location: investigation.location,
+    count: visitTimes.length,
+    knownTime: visitTimes[0] || null
+  };
+}
+
+function commitTruthBackedInvestigation(investigation, truth, s, markLockedFallback = false) {
+  const key = getInvestigationKey(investigation);
+  const old = s.ledger.investigationHistory.find(h => h.key === key);
+  if (old) return { response: old.response, repeated: true };
+
+  const response = answerFromTruth(investigation, truth, s);
+  const consumed = !(response.type === 'time_location' && response.count === 0);
+
+  if (response.type === 'time_location') {
+    applyTimeLocationResponse(s.domains, s.ledger, response, s);
+    if (response.count === 0) s.ledger.zeroClueCount++;
+    if (response.location === s.mystery.targetLocation && response.count === s.mystery.requiredCount) s.ledger.cEqualsTwoClueCount++;
+  } else {
+    applyCharacterLocationResponse(s.domains, s.ledger, response, s);
+  }
+  if (isDecoyResponse(response, s)) s.ledger.decoyClueCount++;
+
+  propagateMovement(s.domains, s.characters, s.times, s.adjacency);
+  enforceCountConstraintsByDomains(s);
+  tightenDomainsByIndividualPaths(s);
+  enforceCountConstraintsByDomains(s);
+
+  s.ledger.investigationHistory.push({
+    key,
+    investigation,
+    response,
+    strength: getClueStrength(response, s),
+    consumed,
+    lockedTruthBacked: true,
+    lockedFallback: markLockedFallback
+  });
+  return { response, repeated: false };
+}
+
+function handleInvestigation(investigation) {
+  if (state.gameOver) return;
+  if (state.lockedTruth) {
+    const committed = commitTruthBackedInvestigation(investigation, state.lockedTruth, state, false);
+    state.message = committed.repeated
+      ? '重复调查：返回之前已承诺的同一条线索。'
+      : '真相已锁定：本次线索已同步写回账本，玩家证据会继续收束。';
+    addLog(investigation, committed.response, false);
+    render();
+    return;
+  }
+
+  const paidTurns = getPaidTurnCount();
+  const chosen = chooseResponse(investigation, state, state.plan, paidTurns);
+  if (!chosen) {
+    const truth = finalizeTimeline(state, null, 15000);
+    if (!truth) {
+      state.gameOver = true;
+      showFinal('系统无可补全真相：当前动态约束进入死局。这个版本仍是原型，需要调低线索强度。');
+      render();
+      return;
+    }
+    state.lockedTruth = truth;
+    const committed = commitTruthBackedInvestigation(investigation, truth, state, true);
+    state.message = '动态空间变窄，系统已锁定一条可复盘真相，并把本次线索写回账本。';
+    addLog(investigation, committed.response, true);
+    render();
+    return;
+  }
+  const response = chosen.response;
+  const consumeAction = !(response.type === 'time_location' && response.count === 0);
+  commitChosenResponse(chosen, state, investigation, consumeAction);
+  addLog(investigation, response, false);
+
+  if (getPaidTurnCount() >= state.plan.targetTurns) {
+    state.message = '已达到目标调查回合。可以尝试提交答案；如果证据不足，也可以继续调查。';
+  }
+  render();
+}
+
+function getPaidTurnCount() {
+  return state.ledger.investigationHistory.filter(h => h.consumed).length;
+}
+
+function formatInvestigation(inv) {
+  if (inv.type === 'time_location') return `${inv.time} + 地点 ${inv.location}`;
+  return `角色 ${inv.character} + 地点 ${inv.location}`;
+}
+
+function formatResponse(resp) {
+  if (resp.type === 'time_location') {
+    const pub = `${resp.time} 时，地点 ${resp.location} 有 ${resp.count} 人。`;
+    const pri = resp.count > 0 ? `私密：其中一人是 ${resp.knownCharacter}。` : '私密：无人。';
+    const bonus = resp.count === 0 ? '（0 人，不消耗调查次数）' : '';
+    return { pub, pri, bonus };
+  }
+  const pub = `${resp.character} 整局到过地点 ${resp.location} ${resp.count} 次。`;
+  const pri = resp.count > 0 ? `私密：其中一次是在 ${resp.knownTime}。` : '私密：没有到访。';
+  return { pub, pri, bonus: '' };
+}
+
+function addLog(inv, resp, lockedFallback) {
+  const log = document.getElementById('log');
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  const f = formatResponse(resp);
+  item.innerHTML = `<div><b>调查：</b>${formatInvestigation(inv)} ${lockedFallback ? '<span class="bad">（已锁定真相兜底）</span>' : ''}</div>
+    <div class="public">公开：${f.pub} ${f.bonus}</div>
+    <div class="private">${f.pri}</div>`;
+  log.prepend(item);
+}
+
+function lockTruthNow() {
+  if (state.gameOver) return;
+  const truth = finalizeTimeline(state, null, 30000);
+  if (!truth) {
+    state.message = '当前约束暂时无法补全真相。';
+  } else {
+    state.lockedTruth = truth;
+    state.message = '真相已提前锁定。后续调查会从这条完整时间线中读取。';
+  }
+  render();
+}
+
+
+function estimateAnswerComboCountCheap(s) {
+  // 轻量估算：只根据当前 domains / C 人数范围估计“时间+两人”组合上限。
+  // 不调用 finalizeTimeline，所以不保证精确；只用于状态栏和导演打分的粗略节奏参考。
+  const target = s.mystery.targetLocation;
+  const required = s.mystery.requiredCount;
+  let total = 0;
+  const ranges = getTargetLocationRanges(s.domains, s.characters, s.times, target, s);
+  for (const t of s.times) {
+    const r = ranges[t];
+    if (!(r.min <= required && required <= r.max)) continue;
+    let fixed = 0;
+    let possible = 0;
+    for (const ch of s.characters) {
+      const d = s.domains[ch][t];
+      if (d.size === 1 && d.has(target)) fixed++;
+      else if (d.has(target)) possible++;
+    }
+    const need = required - fixed;
+    if (need < 0 || need > possible) continue;
+    if (need === 0) total += 1;
+    else if (need === 1) total += possible;
+    else if (need === 2) total += possible * (possible - 1) / 2;
+    else total += 99;
+  }
+  return Math.max(0, Math.min(99, Math.round(total)));
+}
+
+function countPossibleAnswersForState(s, maxChecks = 90, stopAfter = 3) {
+  const answers = [];
+  let checks = 0;
+  for (const t of s.times) {
+    for (let i = 0; i < s.characters.length; i++) {
+      for (let j = i + 1; j < s.characters.length; j++) {
+        const ans = { time: t, location: s.mystery.targetLocation, characters: [s.characters[i], s.characters[j]] };
+        checks++;
+        if (canCompleteTimeline(s, ans, 900)) answers.push(ans);
+        if (checks >= maxChecks || answers.length >= stopAfter) {
+          return { count: answers.length, truncated: answers.length >= stopAfter || checks >= maxChecks, examples: answers };
+        }
+      }
+    }
+  }
+  return { count: answers.length, truncated: false, examples: answers };
+}
+
+function getPossibleAnswers(maxChecks = 90) {
+  const answers = [];
+  let checks = 0;
+  for (const t of times) {
+    for (let i = 0; i < characters.length; i++) {
+      for (let j = i + 1; j < characters.length; j++) {
+        const ans = { time: t, location: mystery.targetLocation, characters: [characters[i], characters[j]] };
+        checks++;
+        if (canCompleteTimeline(state, ans, 3000)) answers.push(ans);
+        if (checks >= maxChecks && answers.length > 1) return answers;
+      }
+    }
+  }
+  return answers;
+}
+
+function submitAnswer() {
+  if (state.gameOver) return;
+  const t = document.getElementById('answerTime').value;
+  const c1 = document.getElementById('answerChar1').value;
+  const c2 = document.getElementById('answerChar2').value;
+  if (c1 === c2) {
+    state.message = '两个人不能选同一个角色。';
+    render();
+    return;
+  }
+  const submitted = { time: t, location: mystery.targetLocation, characters: [c1, c2] };
+  const possible = getPossibleAnswers(90);
+  if (possible.length !== 1) {
+    state.message = `证据不足：当前线索下还不能唯一锁定答案（可补全答案数约为 ${possible.length}）。请继续调查。`;
+    render();
+    return;
+  }
+  const only = possible[0];
+  const truth = finalizeTimeline(state, only, 30000);
+  state.lockedTruth = truth;
+  state.gameOver = true;
+  if (answerEquals(submitted, only)) {
+    showFinal(`破案成功！\n\n答案：${only.time}，地点 C 的两个人是：${only.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+  } else {
+    showFinal(`答案错误。\n\n正确答案：${only.time}，地点 C 的两个人是：${only.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+  }
+  render();
+}
+
+function revealFailureTruth() {
+  const truth = finalizeTimeline(state, null, 30000);
+  if (!truth) {
+    showFinal('失败：当前约束无法补全真相。');
+    return;
+  }
+  const ans = checkMysteryAndGetAnswer(truth, state);
+  state.lockedTruth = truth;
+  state.gameOver = true;
+  showFinal(`调查结束。\n\n本局真相：${ans.time}，地点 C 的两个人是：${ans.characters.join('、')}。\n\n${formatTruthTable(truth)}`);
+}
+
+function formatTruthTable(truth) {
+  let out = '完整时间线：\n';
+  for (const ch of characters) {
+    out += `${ch}：${times.map(t => truth[ch][t]).join(' → ')}\n`;
+  }
+  return out;
+}
+
+function showFinal(text) {
+  document.getElementById('finalResult').textContent = text;
+}
+
+function domainsToPlain(domains) {
+  const out = {};
+  for (const ch of characters) {
+    out[ch] = {};
+    for (const t of times) out[ch][t] = [...domains[ch][t]].sort();
+  }
+  return out;
+}
+
+function makeDebugSnapshot() {
+  if (!state) return 'no state';
+  const possibleAnswerTimes = getPossibleAnswerTimes(state);
+  const ranges = getTargetLocationRanges(state.domains, state.characters, state.times, state.mystery.targetLocation, state);
+  const payload = {
+    version: 'dynamic_detective_debug_v1.6_mobile_file_fallback',
+    note: '请把这段完整复制给我。它包含初始站位、调查历史、约束账本、C人数范围和当前候选域。',
+    plan: state.plan?.name,
+    paidTurnCount: getPaidTurnCount(),
+    initialPositions: state.initialPositions,
+    adjacency: state.adjacency,
+    mystery: state.mystery,
+    possibleAnswerTimes,
+    targetLocationRanges: ranges,
+    ledger: state.ledger,
+    domains: domainsToPlain(state.domains),
+    lockedTruth: state.lockedTruth,
+    lockedTruthAnswer: state.lockedTruth ? checkMysteryAndGetAnswer(state.lockedTruth, state) : null,
+    gameOver: state.gameOver,
+    message: state.message
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+function refreshDebugLog() {
+  const el = document.getElementById('debugLog');
+  if (el) el.value = makeDebugSnapshot();
+}
+
+async function copyDebugLog() {
+  refreshDebugLog();
+  const el = document.getElementById('debugLog');
+  try {
+    await navigator.clipboard.writeText(el ? el.value : makeDebugSnapshot());
+    if (state) state.message = '调试 log 已复制。';
+  } catch (e) {
+    if (el) {
+      el.select();
+      document.execCommand('copy');
+    }
+    if (state) state.message = '调试 log 已复制。';
+  }
+  if (state) render();
+}
+
+function render() {
+  if (!state) {
+    refreshDebugLog();
+    return;
+  }
+  renderStatus();
+  renderMap();
+  renderInitialList();
+  renderDomainTable();
+  refreshDebugLog();
+}
+
+function renderStatus() {
+  const paid = getPaidTurnCount();
+  const hasTargetTurns = state.plan.targetTurns < 900;
+  const remaining = hasTargetTurns ? Math.max(0, state.plan.targetTurns - paid) : '—';
+  const possibleTimes = getPossibleAnswerTimes(state);
+  document.getElementById('status').innerHTML = `
+    <div><b>模式：</b>${state.plan.name}</div>
+    <div><b>调查节奏：</b>${hasTargetTurns ? `目标 ${state.plan.targetTurns} 回合` : '不限制目标回合'}，已消耗：${paid}，建议剩余：${remaining}</div>
+    <div><b>谜题目标：</b>找出唯一时间点，以及当时在 C 房间里的两个人。</div>
+    <div><b>当前 C 仍可能成为答案的时间：</b>${possibleTimes.join('、') || '无'}</div>
+    <div class="${state.message ? 'ok' : 'small'}">${state.message || '系统尚未预设完整真相，真相会随调查逐步确定。'}</div>
+  `;
+}
+
+function renderMap() {
+  const map = document.getElementById('map');
+  map.innerHTML = '';
+  const time = 'T1';
+  for (const loc of locations) {
+    const div = document.createElement('div');
+    div.className = 'loc';
+    const here = characters.filter(ch => state.initialPositions[ch] === loc);
+    div.innerHTML = `<strong>${loc}</strong><div class="small">邻接：${adjacency[loc].join('、')}</div><div class="char-list">${here.length ? here.map(x => `<span class="pill">${x}</span>`).join('') : '—'}</div>`;
+    map.appendChild(div);
+  }
+}
+
+function renderInitialList() {
+  const el = document.getElementById('initialList');
+  el.innerHTML = characters.map(ch => `<span class="pill">${ch}: ${state.initialPositions[ch]}</span>`).join('');
+}
+
+function renderDomainTable() {
+  const el = document.getElementById('domainTable');
+  let html = '<table><thead><tr><th>角色/时间</th>' + times.map(t => `<th>${t}</th>`).join('') + '</tr></thead><tbody>';
+  for (const ch of characters) {
+    html += `<tr><th>${ch}</th>`;
+    for (const t of times) {
+      const d = [...state.domains[ch][t]].sort();
+      let text = d.length === 1 ? d[0] : d.join('/');
+      html += `<td>${text}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+
+function getAllInvestigationsForStrategy(s) {
+  const all = [];
+  for (const t of s.times) for (const loc of s.locations) all.push({ type: 'time_location', time: t, location: loc });
+  for (const ch of s.characters) for (const loc of s.locations) all.push({ type: 'character_location', character: ch, location: loc });
+  return all;
+}
+
+function isAskedInState(simState, inv) {
+  const key = getInvestigationKey(inv);
+  return simState.ledger.investigationHistory.some(h => h.key === key);
+}
+
+function pickInvestigationForStrategy(simState, strategyName, clickIndex) {
+  const target = simState.mystery.targetLocation;
+  const tlC = simState.times.slice(1).map(t => ({ type: 'time_location', time: t, location: target }));
+  const clC = simState.characters.map(ch => ({ type: 'character_location', character: ch, location: target }));
+  const firstUnasked = (arr) => arr.find(inv => !isAskedInState(simState, inv));
+
+  if (strategyName === '直攻 C') {
+    return firstUnasked(tlC) || firstUnasked(clC) || firstUnasked(getAllInvestigationsForStrategy(simState));
+  }
+
+  if (strategyName === '均衡 C') {
+    if (clickIndex % 2 === 0) return firstUnasked(tlC) || firstUnasked(clC) || firstUnasked(getAllInvestigationsForStrategy(simState));
+    return firstUnasked(clC) || firstUnasked(tlC) || firstUnasked(getAllInvestigationsForStrategy(simState));
+  }
+
+  // 半随机：70% 盯 C，30% 查其他位置；仍然避免重复调查。
+  const r = Math.random();
+  if (r < 0.45) return firstUnasked(tlC) || firstUnasked(clC) || firstUnasked(getAllInvestigationsForStrategy(simState));
+  if (r < 0.75) return firstUnasked(clC) || firstUnasked(tlC) || firstUnasked(getAllInvestigationsForStrategy(simState));
+  const rest = getAllInvestigationsForStrategy(simState).filter(inv => !isAskedInState(simState, inv));
+  return rest.length ? rest[Math.floor(Math.random() * rest.length)] : null;
+}
+
+function simulateOneRun(strategyName, maxClicks = 18) {
+  const sim = newState(plans.standard);
+  const truth = finalizeTimeline(sim, null, 30000);
+  if (!truth) return { converged: false, clicks: 0, paid: 0, curve: ['无真相'] };
+  sim.lockedTruth = truth;
+  const curve = [];
+  for (let click = 0; click <= maxClicks; click++) {
+    const probe = countPossibleAnswersForState(sim, 90, 2);
+    curve.push(probe.truncated ? `${probe.count}+` : `${probe.count}`);
+    if (probe.count === 1 && !probe.truncated) {
+      return { converged: true, clicks: click, paid: sim.ledger.investigationHistory.filter(h => h.consumed).length, curve };
+    }
+    if (click === maxClicks) break;
+    const inv = pickInvestigationForStrategy(sim, strategyName, click);
+    if (!inv) break;
+    commitTruthBackedInvestigation(inv, truth, sim, false);
+  }
+  return { converged: false, clicks: maxClicks, paid: sim.ledger.investigationHistory.filter(h => h.consumed).length, curve };
+}
+
+function summarizeStrategy(strategyName, runs) {
+  const results = [];
+  for (let i = 0; i < runs; i++) results.push(simulateOneRun(strategyName));
+  const converged = results.filter(r => r.converged);
+  const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : '—';
+  const clicks = converged.map(r => r.clicks);
+  const paid = converged.map(r => r.paid);
+  const maxCurveLen = Math.max(...results.map(r => r.curve.length));
+  const curveAvg = [];
+  for (let i = 0; i < maxCurveLen; i++) {
+    const nums = results.map(r => String(r.curve[i] ?? '')).filter(Boolean).map(x => parseInt(x, 10)).filter(Number.isFinite);
+    if (nums.length) curveAvg.push(avg(nums));
+  }
+  return {
+    strategyName,
+    runs,
+    converged: converged.length,
+    failed: runs - converged.length,
+    avgClicks: avg(clicks),
+    avgPaid: avg(paid),
+    minClicks: clicks.length ? Math.min(...clicks) : '—',
+    maxClicks: clicks.length ? Math.max(...clicks) : '—',
+    curveAvg
+  };
+}
+
+function runEvaluator() {
+  const el = document.getElementById('evalResult');
+  const runsSelect = document.getElementById('evalRunsSelect');
+  const runs = parseInt(runsSelect ? runsSelect.value : '20', 10) || 20;
+  const strategies = ['直攻 C', '均衡 C', '半随机'];
+  let out = `评估谜题：固定地点 C，找唯一 C=2 的时间 + 两个人\n每策略模拟：${runs} 局\n最大点击数：18\n提示：评估会做回溯搜索，手机上建议先用 5 局。\n\n`;
+  for (const name of strategies) {
+    const s = summarizeStrategy(name, runs);
+    out += `【${s.strategyName}】\n`;
+    out += `收束：${s.converged}/${s.runs}，未收束：${s.failed}\n`;
+    out += `平均点击数：${s.avgClicks}，平均消耗调查：${s.avgPaid}\n`;
+    out += `最短/最长点击数：${s.minClicks}/${s.maxClicks}\n`;
+    out += `答案组合数曲线均值：${s.curveAvg.join(' → ')}\n\n`;
+  }
+  if (el) el.textContent = out;
+}
+
+function fillSelect(id, arr) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (const x of arr) {
+    const opt = document.createElement('option');
+    opt.value = x;
+    opt.textContent = x;
+    el.appendChild(opt);
+  }
+}
+
+function initUI() {
+  fillSelect('timeSelect', times);
+  fillSelect('locationSelect1', locations);
+  fillSelect('characterSelect', characters);
+  fillSelect('locationSelect2', locations);
+  fillSelect('answerTime', times);
+  fillSelect('answerChar1', characters);
+  fillSelect('answerChar2', characters);
+
+  document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      document.getElementById('timeLocationPanel').style.display = mode === 'time_location' ? '' : 'none';
+      document.getElementById('characterLocationPanel').style.display = mode === 'character_location' ? '' : 'none';
+    });
+  });
+  document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+  document.getElementById('investigateBtn').addEventListener('click', () => {
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    let inv;
+    if (mode === 'time_location') {
+      inv = { type: 'time_location', time: document.getElementById('timeSelect').value, location: document.getElementById('locationSelect1').value };
+    } else {
+      inv = { type: 'character_location', character: document.getElementById('characterSelect').value, location: document.getElementById('locationSelect2').value };
+    }
+    handleInvestigation(inv);
+  });
+  document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+  document.getElementById('lockTruthBtn').addEventListener('click', lockTruthNow);
+  document.getElementById('refreshDebugBtn').addEventListener('click', refreshDebugLog);
+  document.getElementById('copyDebugBtn').addEventListener('click', copyDebugLog);
+  document.getElementById('refreshDebugBtnTop').addEventListener('click', refreshDebugLog);
+  document.getElementById('copyDebugBtnTop').addEventListener('click', copyDebugLog);
+}
+
+function startNewGame() {
+  // v1.2：v1.0/v1.1 已经移除了 4/8 下拉框，但旧代码仍读取 planSelect，导致初始化失败，state 一直是 null。
+  const planSelect = document.getElementById('planSelect');
+  const plan = planSelect ? plans[planSelect.value] : plans.standard;
+  try {
+    state = newState(plan || plans.standard);
+    const log = document.getElementById('log');
+    if (log) log.innerHTML = '';
+    showFinal('尚未揭示真相。');
+    render();
+  } catch (e) {
+    state = null;
+    const box = document.getElementById('debugLog');
+    if (box) box.value = `初始化失败：${e.message || e}\n${e.stack || ''}`;
+    const status = document.getElementById('status');
+    if (status) status.innerHTML = `<span class="bad">初始化失败：${e.message || e}</span>`;
+    throw e;
+  }
+}
+
+window.addEventListener('error', (event) => {
+  const msg = `JS 错误：${event.message || '未知错误'} @ ${event.filename || 'inline'}:${event.lineno || '?'}:${event.colno || '?'}`;
+  console.error(msg, event.error);
+  if (state) state.message = msg;
+  const box = document.getElementById('debugLog');
+  if (box) box.value = `${msg}
+
+${makeDebugSnapshot()}`;
+  try { renderStatus(); } catch (e) {}
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason && (event.reason.stack || event.reason.message || String(event.reason));
+  const msg = `Promise 错误：${reason || '未知错误'}`;
+  console.error(msg, event.reason);
+  if (state) state.message = msg;
+  const box = document.getElementById('debugLog');
+  if (box) box.value = `${msg}
+
+${makeDebugSnapshot()}`;
+  try { renderStatus(); } catch (e) {}
+});
+
+function bootApp() {
+  try {
+    initUI();
+    startNewGame();
+  } catch (e) {
+    const box = document.getElementById('debugLog');
+    if (box) box.value = `启动失败：${e.message || e}\n${e.stack || ''}`;
+    throw e;
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
+}
+</script>
+</body>
+</html>
