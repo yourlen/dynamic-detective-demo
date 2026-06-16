@@ -1667,6 +1667,16 @@
         });
       });
       const params = paramsArrayToObject(conditionParams);
+      const visibleInitialActors = Array.isArray(params.visibleInitialActors)
+        ? params.visibleInitialActors
+        : Array.isArray(params.初始可见角色)
+          ? params.初始可见角色
+          : null;
+      if (visibleInitialActors) {
+        Object.keys(initialKnown).forEach(actorId => {
+          if (!visibleInitialActors.includes(actorId)) delete initialKnown[actorId];
+        });
+      }
       const setting = {
         id,
         title,
@@ -1976,16 +1986,40 @@
       const fallbackPaths = buildConfiguredPaths(setting, rng(seed + 777));
       const fallbackSolution = solveConfiguredCondition(setting, fallbackPaths, rng(seed + 888));
       if (!fallbackSolution) {
-      throw new Error(`${setting.title || setting.id} 无法生成唯一答案，请检查初始站位、行动路径或谜题条件。`);
+        return fallbackConfiguredCase(setting, seed + 999);
       }
       if (!hasEnoughEliminationSpace(setting, fallbackSolution)) {
-        throw new Error(`${setting.title || setting.id} 初始信息过于明显，请减少已知信息或调整路径。`);
+        return fallbackConfiguredCase(setting, seed + 999);
       }
       return {
         paths: fallbackPaths,
         solution: fallbackSolution,
         difficulty: expectedAlwaysAloneQuestions(),
         initialKnown: setting.initialKnown
+      };
+    }
+
+    function fallbackConfiguredCase(setting, seed) {
+      const type = setting.conditionType;
+      const fallback = type === 'theft' ? fallbackTheftCase()
+        : type === 'alwaysTogether' ? fallbackCompanionCase()
+        : type === 'jewelTransfer' ? fallbackJewelCase()
+        : type === 'bomb' ? fallbackBombCase()
+        : type === 'neverMeetPair' ? fallbackLoversCase()
+        : type === 'visitCount' ? fallbackVandalCase()
+        : fallbackCase();
+      const visibleActors = setting.conditionParams?.visibleInitialActors;
+      const knownCount = Array.isArray(visibleActors)
+        ? visibleActors.length
+        : Math.max(1, Object.keys(setting.initialKnown || {}).length || Number(setting.known || 6));
+      const generatedInitialKnown = Array.isArray(visibleActors)
+        ? Object.fromEntries(visibleActors.map(actorId => [actorId, fallback.paths[actorId]?.[0]]).filter(item => item[1]))
+        : pickInitialKnown(fallback.paths, Math.min(actors.length, knownCount), rng(seed));
+      return {
+        paths: clonePaths(fallback.paths),
+        solution: fallback.solution,
+        difficulty: fallback.difficulty,
+        initialKnown: generatedInitialKnown
       };
     }
 
